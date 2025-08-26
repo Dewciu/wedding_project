@@ -29,8 +29,8 @@
 
 .table-map {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-columns: repeat(8, 1fr); /* More columns for better control */
+    grid-template-rows: repeat(6, 1fr);
     gap: 30px;
     justify-items: center;
     align-items: center;
@@ -58,11 +58,25 @@
     transform: scale(0.8);
 }
 
-/* Rectangular tables for 2 and 3 */
+/* Rectangular tables - default size for tables 2 and 3 */
 .table-2, .table-3 {
-    width: 160px;
-    height: 80px;
-    border-radius: 15px;
+    width: 220px;
+    height: 70px;
+    border-radius: 18px;
+}
+
+/* Special styling for table 1 - taller and narrower */
+.table-1 {
+    width: 70px;
+    height: 220px;
+    border-radius: 18px;
+    justify-self: start; /* Align to the left */
+    margin-left: 20px;
+}
+
+/* Add hover effect for table 1 without rotation */
+.table-1:hover {
+    transform: scale(1.08);
 }
 
 .table-circle.loaded {
@@ -171,16 +185,16 @@
 }
 
 /* Positioning for tables based on the image layout */
-.table-1 { grid-column: 1; grid-row: 3; }
-.table-2 { grid-column: 3 / 5; grid-row: 5; }  /* Bottom center - rectangular */
-.table-3 { grid-column: 3 / 5; grid-row: 1; }  /* Top center - rectangular */
-.table-4 { grid-column: 1; grid-row: 1; }
-.table-5 { grid-column: 1; grid-row: 4; }
-.table-6 { grid-column: 2; grid-row: 2; }
-.table-7 { grid-column: 3; grid-row: 4; }
-.table-8 { grid-column: 4; grid-row: 2; }
-.table-9 { grid-column: 5; grid-row: 3; }
-.table-10 { grid-column: 6; grid-row: 1; }
+.table-1 { grid-column: 1 / 4; grid-row: 3 / 4; }      /* Horizontal rectangle, left side */
+.table-2 { grid-column: 2 / 6; grid-row: 6 / 7; }      /* Bottom horizontal rectangle */
+.table-3 { grid-column: 2 / 8; grid-row: 1 / 2; }      /* Top horizontal rectangle */
+.table-4 { grid-column: 2 / 3; grid-row: 2 / 3; }
+.table-5 { grid-column: 2 / 3; grid-row: 4 / 5; }
+.table-6 { grid-column: 3 / 4; grid-row: 3 / 4; }
+.table-7 { grid-column: 4 / 5; grid-row: 4 / 5; }
+.table-8 { grid-column: 5 / 6; grid-row: 3 / 4; }
+.table-9 { grid-column: 6 / 7; grid-row: 4 / 5; }
+.table-10 { grid-column: 7 / 8; grid-row: 2 / 3; }
 
 /* Legend */
 .map-legend {
@@ -230,36 +244,34 @@
 @media (max-width: 968px) {
     .table-map {
         grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(4, 1fr);
+        grid-template-rows: repeat(6, 1fr);
         gap: 25px;
         min-height: 600px;
     }
-    
-    .table-circle {
-        width: 90px;
-        height: 90px;
+    .table-1 {
+        width: 55px;
+        height: 170px;
     }
-    
     .table-2, .table-3 {
-        width: 130px;
-        height: 65px;
+        width: 170px;
+        height: 55px;
     }
-    
-    .table-number {
-        font-size: 1.8rem;
+    .table-1 {
+        transform: rotate(90deg);
+        transform-origin: center;
+        left: -60px;
     }
-    
     /* Reposition for smaller screens */
-    .table-1 { grid-column: 1; grid-row: 2; }
-    .table-2 { grid-column: 2 / 4; grid-row: 4; }
-    .table-3 { grid-column: 2 / 4; grid-row: 1; }
-    .table-4 { grid-column: 1; grid-row: 1; }
-    .table-5 { grid-column: 1; grid-row: 3; }
-    .table-6 { grid-column: 2; grid-row: 2; }
-    .table-7 { grid-column: 2; grid-row: 3; }
-    .table-8 { grid-column: 3; grid-row: 2; }
-    .table-9 { grid-column: 4; grid-row: 2; }
-    .table-10 { grid-column: 4; grid-row: 1; }
+    .table-1 { grid-column: 1 / 2; grid-row: 2 / 6; }
+    .table-2 { grid-column: 2 / 4; grid-row: 6 / 7; }
+    .table-3 { grid-column: 2 / 5; grid-row: 1 / 2; }
+    .table-4 { grid-column: 2 / 3; grid-row: 2 / 3; }
+    .table-5 { grid-column: 2 / 3; grid-row: 4 / 5; }
+    .table-6 { grid-column: 3 / 4; grid-row: 3 / 4; }
+    .table-7 { grid-column: 3 / 4; grid-row: 5 / 6; }
+    .table-8 { grid-column: 4 / 5; grid-row: 3 / 4; }
+    .table-9 { grid-column: 4 / 5; grid-row: 5 / 6; }
+    .table-10 { grid-column: 4 / 5; grid-row: 2 / 3; }
 }
 
 @media (max-width: 768px) {
@@ -279,6 +291,11 @@
         height: 60px;
     }
     
+    .table-1 {
+        width: 120px;
+        height: 60px;
+    }
+    
     .table-number {
         font-size: 1.6rem;
     }
@@ -287,6 +304,11 @@
         width: 24px;
         height: 24px;
         font-size: 0.6rem;
+    }
+    
+    .table-1 {
+        transform: none;
+        left: 0;
     }
     
     /* Reset positioning for mobile - simple 2-column grid */
@@ -423,7 +445,7 @@
                             <div class="guest-avatar{% if guest_info and guest.id == guest_info.id %} current-guest{% endif %}" 
                                  title="{{ guest.full_name }}"
                                  data-guest-name="{{ guest.full_name }}"
-                                 data-table-type="{% if table.number == 2 or table.number == 3 %}rectangular{% else %}circular{% endif %}">
+                                 data-table-type="{% if table.number == 1 or table.number == 2 or table.number == 3 %}rectangular{% else %}circular{% endif %}">
                                 {{ guest.user.first_name|first|upper }}
                             </div>
                         {% endfor %}
