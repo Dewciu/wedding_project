@@ -1,0 +1,141 @@
+﻿Imię;Nazwisko;*Typ*;Stół
+Jolanta;Cadera;*gość*;2
+Tomasz;Cadera;*gość*;2
+Barbara;Cadera;*gość*;4
+Mikołaj;Stefański;*gość*;4
+Justyna;Cadera;*gość*;4
+Wiktor;Jagiełło;*gość*;4
+Ignacy;Cadera;*gość*;4
+Anna;Marcisz;*gość*;2
+Jan;Marcisz;*gość*;2
+Helena;Cadera;*gość*;2
+Stanisław;Cadera;*gość*;2
+Agnieszka;Świątek;*gość*;2
+Arkadiusz;Świątek;*gość*;2
+Lena;Świątek;*gość*;9
+Nina;Świątek;*gość*;9
+Martyna;Świątek;*gość*;9
+Katarzyna;Marcisz;*gość*;2
+Jarosław;Marcisz;*gość*;2
+Piotr;Marcisz;*gość*;4
+Dominik;Marcisz;*gość*;9
+Michał;Cadera;*gość*;2
+Jan;Cadera;*gość*;9
+Hanna;Cadera;*gość*;9
+Anna;Starz;*gość*;2
+Mariusz;Starz;*gość*;2
+Stanisław;Starz;*gość*;9
+Hanna;Starz;*gość*;9
+Olga;Adamczyk;*gość*;4
+Karol;Adamczyk;*gość*;4
+Joanna;Ćwierz;*gość*;x
+Marta;Głąbek;*gość*;2
+Michał;Głąbek;*gość*;2
+Filip;Ćwierz;*gość*;2
+Katrzyna;Ćwierz;*gość*;2
+Elżbieta;Ćwierz;*gość*;2
+Michał;Ćwierz;*gość*;2
+Donata;Derela;*gość*;2
+Zbigniew;Derela;*gość*;2
+Bartosz;Derela;*gość*;2
+Maja;Derela;*gość*;9
+Maria;Derela;*gość*;9
+Maciej;Derela;*gość*;2
+osoba towarzysząca;Macieja Dereli;*osoba towarzysząca*;2
+Sylwia;Jopkiewicz;*gość*;2
+Tomasz;Jopkiewicz;*gość*;2
+Anna;Toporek;*gość*;2
+Arkadiusz;Woźniak;*gość*;2
+Inga;Podstawka;*gość*;2
+Klaudia;Zaczkiewicz;*gość*;4
+Konrad;Zaczkiewicz;*gość*;4
+Ignacy;Głąbek;*gość*;2
+Maciej;Głąbek;*gość*;2
+Bartłomiej;Głąbek;*gość*;2
+Iwona;Samburska;*gość*;3
+Marcin;Samburski;*gość*;3
+Marta;Samburska-Kinal;*gość*;6
+Kuba;Kinal;*gość*;6
+Krystyna;Samburska;*gość*;3
+Zdzisław;Samburski;*gość*;3
+Helena;Król;*gość*;3
+Stanislaw;Król;*gość*;3
+Wojciech;Kułagowski;*gość*;3
+Wioletta;Kułagowska;*gość*;3
+Lena;Kułagowska-Urys;*gość*;10
+Bartek;Urys;*gość*;10
+Katarzyna;Kułagowska;*gość*;10
+Maciej;Sobolewski;*gość*;10
+Ewa;Juzuń;*gość*;3
+Arkadiusz;Juzuń;*gość*;3
+Julia;Juzuń;*gość*;10
+osoba towarzysząca;Julii Juzuń;*osoba towarzysząca*;10
+Jan;Juzuń;*gość*;10
+Patrycja;Galus;*gość*;10
+Aleksandra;Cavender;*gość*;3
+Emilka;Cavender;*gość*;3
+Kamila;Wilk;*gość*;3
+Dawid;Wilk;*gość*;3
+dziecko 1;Wilk;*gość*;3
+dziecko 2;Wilk;*gość*;3
+Barbara;Lis;*gość*;3
+Stanisław;Lis;*gość*;3
+Renata;Dzięcioł;*gość*;3
+Marcin;Dzięcioł;*gość*;3
+Kacper;Król;*gość*;x
+osoba towarzysząca;Kacpra Króla;*osoba towarzysząca*;x
+Dorota;Król;*gość*;3
+Jarosław;Król;*gość*;3
+Stefan;Król;*gość*;3
+Sabina;Król;*gość*;3
+Dominika;Biliński;*gość*;3
+Krzysztof;Bilińska;*gość*;3
+Amelia;Bilińska;*gość*;7
+Lena;Bilińska;*gość*;7
+Mateusz;Biliński;*gość*;7
+Karolina;Korzec;*gość*;7
+Monika;Sidło;*gość*;3
+Robert;Sidło;*gość*;3
+Teresa;Jakubowska;*gość*;3
+Jacek;Jakubowski;*gość*;3
+Grażyna;Barwinek;*gość*;3
+Michał;Barwinek;*gość*;3
+Rafał;Król;*gość*;3
+Katarzyna;Król;*gość*;3
+Bolek;Sobolewski;*gość*;10
+Oskar;Żak;*gość*;8
+Roksana;Barańska;*osoba towarzysząca*;8
+Filip;Lichwała;*gość*;8
+Aleksandra;Siek;*osoba towarzysząca*;8
+Adam;Hachulski;*gość*;8
+Natalia;Jankowska;*osoba towarzysząca*;8
+Mateusz;Wróbel;*gość*;8
+Marlena;Rubak;*gość*;8
+Kacper;Śliwa;*gość*;8
+Patrycja;Kosińska;*gość*;8
+Mateusz Król;Król;*gość*;6
+osoba towarzysząca;Mateusza Króla;*osoba towarzysząca*;6
+Bartłomiej;Rylski;*gość*;7
+Radosław;Wójcik;*gość*;7
+osoba towarzysząca;Radosława Wójcika;*osoba towarzysząca*;7
+Maciej;Marzec;*gość*;7
+osoba towarzysząca;Macieja Marca;*osoba towarzysząca*;7
+Dawid;Martyka;*gość*;6
+Bartosz;Wójcik;*gość*;7
+Patryk;Janusz;*gość*;5
+Aleksandra;Janowska;*osoba towarzysząca*;5
+Patryk;Martyka;*gość*;6
+Katarzyna;Piotrowska;*gość*;6
+Norbert;Dąbek;*gość*;6
+Daria;Śliwa;*gość*;5
+Piotr;Śliwa;*gość*;5
+Klaudia Ciszek;Ciszek;*gość*;5
+Jakub;Kaleta;*osoba towarzysząca*;5
+Dominika;Górska;*gość*;5
+osoba towarzysząca;Dominiki Górskiej;*osoba towarzysząca*;5
+Michał;Majcher;*gość*;5
+osoba towarzysząca;Michała Majchra;*osoba towarzysząca*;5
+Wojciech;Rutkowski;*gość*;5
+fotograf 1;;*gość*;0
+fotograf 2;;*gość*;0
+DJ;;*gość*;0

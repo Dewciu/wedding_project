@@ -58,6 +58,12 @@ class Table(models.Model):
     @property
     def available_seats(self):
         return self.capacity - self.guests_count
+    
+    @property
+    def occupancy_percentage(self):
+        if self.capacity > 0:
+            return int((self.guests_count / self.capacity) * 100)
+        return 0
 
 class Photo(models.Model):
     CATEGORY_CHOICES = [

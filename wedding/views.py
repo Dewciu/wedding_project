@@ -90,8 +90,14 @@ def table_finder(request):
                         except Table.DoesNotExist:
                             table_info = None
     
-    # Get all tables for the seating plan
-    tables = Table.objects.all().prefetch_related('guest_set')
+    # Get all tables with their guests for the seating plan
+    tables = Table.objects.all().order_by('number')
+    
+    # Add guest count and guest list to each table
+    for table in tables:
+        table.guest_list = Guest.objects.filter(
+            table_number=table.number
+        ).select_related('user').order_by('user__first_name')
     
     context = {
         'form': form,
@@ -145,12 +151,29 @@ def ajax_table_search(request):
             results['found'] = True
             results['guest_name'] = guest.full_name
             results['table_number'] = guest.table_number or 'Nie przypisano'
+            results['guest_id'] = guest.id
             
             if guest.table_number:
+                # Get table info
+                try:
+                    table = Table.objects.get(number=guest.table_number)
+                    results['table_name'] = table.name
+                    results['table_description'] = table.description
+                except Table.DoesNotExist:
+                    pass
+                
+                # Get other guests at the table
                 table_guests = Guest.objects.filter(
                     table_number=guest.table_number
                 ).exclude(id=guest.id).select_related('user')
                 
-                results['table_guests'] = [g.full_name for g in table_guests]
+                results['table_guests'] = [
+                    {
+                        'name': g.full_name,
+                        'first_name': g.user.first_name,
+                        'last_name': g.user.last_name
+                    }
+                    for g in table_guests
+                ]
     
     return JsonResponse(results)

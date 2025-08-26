@@ -3,17 +3,357 @@
 
 {% block title %}Znajdź Swój Stół - {{ block.super }}{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Table Map Styles */
+.table-map-container {
+    background: linear-gradient(135deg, #f8f5f0 0%, #ede8dd 100%);
+    border-radius: 20px;
+    padding: 40px 30px;
+    margin: 30px 0;
+    box-shadow: 0 12px 24px rgba(93, 78, 55, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.table-map-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212, 196, 168, 0.1) 0%, transparent 70%);
+    animation: gentle-rotate 30s linear infinite;
+}
+
+.table-map {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 40px;
+    justify-items: center;
+    align-items: center;
+    min-height: 700px;
+    position: relative;
+    z-index: 1;
+}
+
+.table-circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #d4c4a8, #c8b99c);
+    border: 3px solid #b8a082;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 
+        0 6px 20px rgba(93, 78, 55, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.table-circle.loaded {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.table-circle:hover {
+    transform: scale(1.08);
+    box-shadow: 
+        0 10px 30px rgba(93, 78, 55, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+.table-circle.highlighted {
+    background: linear-gradient(145deg, #8b6f47, #5d4e37);
+    border-color: #2c1810;
+    transform: scale(1.15);
+    animation: pulse-highlight 2s infinite;
+}
+
+@keyframes pulse-highlight {
+    0% { box-shadow: 0 10px 30px rgba(93, 78, 55, 0.3); }
+    50% { box-shadow: 0 15px 40px rgba(93, 78, 55, 0.5), 0 0 0 10px rgba(93, 78, 55, 0.1); }
+    100% { box-shadow: 0 10px 30px rgba(93, 78, 55, 0.3); }
+}
+
+@keyframes gentle-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.table-number {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #5d4e37;
+    z-index: 2;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.table-circle.highlighted .table-number {
+    color: #f5f0e8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.table-info {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(93, 78, 55, 0.95), rgba(61, 52, 42, 0.95));
+    color: #f5f0e8;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.table-circle:hover .table-info {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+/* Guest avatars around tables */
+.guest-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #8b6f47, #5d4e37);
+    border: 2px solid #f5f0e8;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: #f5f0e8;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+}
+
+.guest-avatar:hover {
+    transform: scale(1.3);
+    z-index: 15;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.guest-avatar.current-guest {
+    background: linear-gradient(145deg, #d4a574, #b8935f);
+    border-color: #2c1810;
+    width: 32px;
+    height: 32px;
+    animation: glow-pulse 2s infinite;
+}
+
+@keyframes glow-pulse {
+    0% { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
+    50% { box-shadow: 0 6px 20px rgba(212, 165, 116, 0.6), 0 0 0 5px rgba(212, 165, 116, 0.2); }
+    100% { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
+}
+
+/* Positioning for tables - based on your reference image */
+.table-1 { grid-column: 1; grid-row: 2; }
+.table-2 { grid-column: 4; grid-row: 4; }
+.table-3 { grid-column: 2; grid-row: 4; }
+.table-4 { grid-column: 1; grid-row: 1; }
+.table-5 { grid-column: 1; grid-row: 3; }
+.table-6 { grid-column: 2; grid-row: 2; }
+.table-7 { grid-column: 3; grid-row: 3; }
+.table-8 { grid-column: 3; grid-row: 1; }
+.table-9 { grid-column: 3; grid-row: 4; }
+.table-10 { grid-column: 4; grid-row: 1; }
+
+/* Dance floor in the center */
+.dance-floor {
+    grid-column: 2 / 4;
+    grid-row: 2 / 4;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(145deg, #b8a082, #8b6f47);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5f0e8;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
+    box-shadow: 
+        inset 0 4px 8px rgba(0, 0, 0, 0.2),
+        0 4px 15px rgba(93, 78, 55, 0.2);
+    opacity: 0.8;
+    z-index: 0;
+}
+
+/* Legend */
+.map-legend {
+    background: rgba(248, 245, 240, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 25px 0;
+    border: 1px solid rgba(212, 196, 168, 0.5);
+    box-shadow: 0 4px 15px rgba(93, 78, 55, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 0.95rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 15px;
+    border: 2px solid #b8a082;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.legend-color.normal { background: linear-gradient(145deg, #d4c4a8, #c8b99c); }
+.legend-color.highlighted { background: linear-gradient(145deg, #8b6f47, #5d4e37); }
+.legend-color.current { background: linear-gradient(145deg, #d4a574, #b8935f); }
+
+/* Enhanced table cards */
+.table-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.table-card.highlighted-card {
+    border: 2px solid #8b6f47 !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(139, 111, 71, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .table-map {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        min-height: 600px;
+    }
+    
+    .table-circle {
+        width: 110px;
+        height: 110px;
+    }
+    
+    .table-number {
+        font-size: 1.8rem;
+    }
+    
+    .dance-floor {
+        grid-column: 2;
+        grid-row: 2;
+        width: 80px;
+        height: 80px;
+    }
+    
+    /* Reposition for 3 columns */
+    .table-1 { grid-column: 1; grid-row: 1; }
+    .table-2 { grid-column: 3; grid-row: 1; }
+    .table-3 { grid-column: 1; grid-row: 3; }
+    .table-4 { grid-column: 1; grid-row: 2; }
+    .table-5 { grid-column: 1; grid-row: 4; }
+    .table-6 { grid-column: 2; grid-row: 1; }
+    .table-7 { grid-column: 3; grid-row: 2; }
+    .table-8 { grid-column: 2; grid-row: 3; }
+    .table-9 { grid-column: 3; grid-row: 3; }
+    .table-10 { grid-column: 3; grid-row: 4; }
+}
+
+@media (max-width: 768px) {
+    .table-map {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+        min-height: 800px;
+    }
+    
+    .table-circle {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .table-number {
+        font-size: 1.6rem;
+    }
+    
+    .guest-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6rem;
+    }
+    
+    .dance-floor {
+        display: none; /* Hide on mobile to save space */
+    }
+    
+    /* Reset positioning for mobile */
+    .table-1, .table-2, .table-3, .table-4, .table-5, 
+    .table-6, .table-7, .table-8, .table-9, .table-10 {
+        grid-column: auto;
+        grid-row: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-map-container {
+        padding: 25px 15px;
+    }
+    
+    .table-map {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        min-height: 1000px;
+    }
+    
+    .table-circle {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .guest-avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h2 class="section-title">Znajdź Swój Stół</h2>
+    <h2 class="section-title">
+        <i class="fas fa-map-marked-alt"></i> Znajdź Swój Stół
+    </h2>
     
+    <!-- Search Form -->
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card card-custom">
                 <div class="card-body">
                     <form method="get" id="table-search-form">
-                        {{ form.search_query }}
-                        <button type="submit" class="btn btn-custom-primary btn-block mt-3">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="{{ form.search_query.id_for_label }}" class="sr-only">Wyszukaj gościa</label>
+                            {{ form.search_query }}
+                        </div>
+                        <button type="submit" class="btn btn-custom-primary btn-block">
                             <i class="fas fa-search"></i> Szukaj
                         </button>
                     </form>
@@ -22,66 +362,182 @@
             
             <!-- Search Results -->
             {% if guest_info %}
-            <div class="table-result mt-4">
-                <h4><i class="fas fa-user"></i> {{ guest_info.full_name }}</h4>
-                {% if guest_info.table_number %}
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #5d4e37; margin: 15px 0;">
-                        <i class="fas fa-chair"></i> Stół nr {{ guest_info.table_number }}
-                    </div>
-                    {% if table_info %}
-                    <p><strong>{{ table_info.name }}</strong></p>
-                    <p>{{ table_info.description }}</p>
+            <div class="table-result mt-4 fade-in">
+                <div class="text-center">
+                    <h4><i class="fas fa-user-check"></i> {{ guest_info.full_name }}</h4>
+                    {% if guest_info.table_number %}
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #5d4e37; margin: 20px 0;">
+                            <i class="fas fa-chair"></i> Stół nr {{ guest_info.table_number }}
+                        </div>
+                        {% if table_info %}
+                        <div class="mb-3">
+                            <h5 class="text-primary">{{ table_info.name }}</h5>
+                            <p class="text-muted">{{ table_info.description }}</p>
+                        </div>
+                        {% endif %}
+                        {% if table_guests %}
+                        <div class="mt-3">
+                            <h6><strong>Towarzysze przy stole:</strong></h6>
+                            <div class="row">
+                                {% for guest in table_guests %}
+                                <div class="col-md-6 col-lg-4 mb-2">
+                                    <div class="badge badge-light p-2">
+                                        <i class="fas fa-user"></i> {{ guest.full_name }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Nie przypisano jeszcze stołu. Skontaktuj się z organizatorami.
+                        </div>
                     {% endif %}
-                    {% if table_guests %}
-                    <p class="mt-3">
-                        <strong>Przy tym stole siedzą również:</strong><br>
-                        {% for guest in table_guests %}
-                            {{ guest.full_name }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                    {% endif %}
-                {% else %}
-                    <p style="color: #8b6f47;">Nie przypisano jeszcze stołu. Skontaktuj się z organizatorami.</p>
-                {% endif %}
+                </div>
             </div>
             {% elif form.search_query.value %}
             <div class="alert alert-info mt-4">
-                <i class="fas fa-info-circle"></i> 
-                Nie znaleziono gościa o tym imieniu. Sprawdź pisownię lub spróbuj wpisać tylko imię lub nazwisko.
+                <i class="fas fa-search"></i> 
+                Nie znaleziono gościa "<strong>{{ form.search_query.value }}</strong>". 
+                Sprawdź pisownię lub spróbuj wpisać tylko imię lub nazwisko.
             </div>
             {% endif %}
         </div>
     </div>
     
-    <!-- Seating Plan -->
+    <!-- Table Map -->
     <div class="row mt-5">
         <div class="col-12">
-            <h4 class="text-center mb-4" style="color: #5d4e37;">Plan Sali</h4>
-            <div class="seating-plan">
-                <div class="table-spot">Stoły 1-3</div>
-                <div class="table-spot" style="background: #c8b99c;">Scena</div>
-                <div class="table-spot">Stoły 4-6</div>
-                <div class="table-spot">Stoły 7-9</div>
-                <div class="table-spot" style="background: #b8a082; color: white;">Parkiet</div>
-                <div class="table-spot">Stoły 10-12</div>
+            <h4 class="text-center mb-4" style="color: #5d4e37;">
+                <i class="fas fa-map"></i> Interaktywna Mapa Stolików
+            </h4>
+            
+            <div class="table-map-container">
+                <div class="table-map">
+                    <!-- Dance floor -->
+                    <div class="dance-floor">
+                        <i class="fas fa-music"></i><br>
+                        Parkiet
+                    </div>
+                    
+                    <!-- Tables -->
+                    {% for table in tables %}
+                    <div class="table-circle table-{{ table.number }}{% if guest_info and guest_info.table_number == table.number %} highlighted{% endif %}" 
+                         data-table="{{ table.number }}" 
+                         title="Kliknij aby zobaczyć szczegóły">
+                        <div class="table-number">{{ table.number }}</div>
+                        <div class="table-info">
+                            <strong>{{ table.name }}</strong><br>
+                            <small>{{ table.guests_count }}/{{ table.capacity }} osób</small>
+                        </div>
+                        
+                        <!-- Generate guest avatars around the table -->
+                        {% for guest in table.guest_list %}
+                            <div class="guest-avatar{% if guest_info and guest.id == guest_info.id %} current-guest{% endif %}" 
+                                 title="{{ guest.full_name }}"
+                                 data-guest-name="{{ guest.full_name }}">
+                                {{ guest.user.first_name|first|upper }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="map-legend">
+                <h6 style="color: #5d4e37; margin-bottom: 15px;">
+                    <i class="fas fa-info-circle"></i> Legenda
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="legend-item">
+                            <div class="legend-color normal"></div>
+                            <span>Zwykły stół (kliknij aby podświetlić)</span>
+                        </div>
+                        {% if guest_info and guest_info.table_number %}
+                        <div class="legend-item">
+                            <div class="legend-color highlighted"></div>
+                            <span>Twój stół</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if guest_info %}
+                        <div class="legend-item">
+                            <div class="legend-color current"></div>
+                            <span>Twoje miejsce</span>
+                        </div>
+                        {% endif %}
+                        <div class="legend-item">
+                            <div style="width: 20px; height: 20px; background: linear-gradient(145deg, #b8a082, #8b6f47); border-radius: 50%; margin-right: 15px;"></div>
+                            <span>Parkiet taneczny</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-mouse-pointer"></i> 
+                        Najedź na stoliki i avatary gości aby zobaczyć szczegóły
+                    </small>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Table Information -->
+    <!-- Table Details -->
     {% if tables %}
     <div class="row mt-4">
         <div class="col-12">
-            <h5 style="color: #5d4e37;">Informacje o stołach:</h5>
+            <h5 style="color: #5d4e37; margin-bottom: 25px;">
+                <i class="fas fa-list-alt"></i> Szczegółowe informacje o stolikach
+            </h5>
             <div class="row">
                 {% for table in tables %}
-                <div class="col-md-4 mb-3">
-                    <div class="card card-custom">
-                        <div class="card-body text-center">
-                            <h6>{{ table }}</h6>
-                            <small class="text-muted">
-                                {{ table.guests_count }}/{{ table.capacity }} miejsc
-                            </small>
+                <div class="col-md-6 col-xl-4 mb-3">
+                    <div class="card card-custom table-card{% if guest_info and guest_info.table_number == table.number %} highlighted-card{% endif %}" 
+                         data-table-card="{{ table.number }}">
+                        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8f5f0, #ede8dd);">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chair"></i> Stół {{ table.number }}
+                                {% if guest_info and guest_info.table_number == table.number %}
+                                    <span class="badge badge-warning ml-2">
+                                        <i class="fas fa-star"></i> Twój stół
+                                    </span>
+                                {% endif %}
+                            </h6>
+                            <div class="text-right">
+                                <div class="progress" style="width: 60px; height: 8px;">
+                                    {% widthratio table.guests_count table.capacity 100 as occupancy_percent %}
+                                    <div class="progress-bar" style="width: {{ occupancy_percent }}%" title="{{ table.guests_count }}/{{ table.capacity }} miejsc"></div>
+                                </div>
+                                <small class="text-muted">{{ table.guests_count }}/{{ table.capacity }}</small>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">{{ table.name }}</h6>
+                            <p class="card-text">
+                                <small class="text-muted">{{ table.description }}</small>
+                            </p>
+                            
+                            {% if table.guest_list %}
+                            <div class="mt-3">
+                                <h6 style="font-size: 0.9rem; color: #8b6f47;">
+                                    <i class="fas fa-users"></i> Goście:
+                                </h6>
+                                <div class="guest-list">
+                                    {% for guest in table.guest_list %}
+                                    <span class="badge badge-light mr-1 mb-1{% if guest_info and guest.id == guest_info.id %} badge-warning{% endif %}"
+                                          style="font-size: 0.8rem;">
+                                        {% if guest_info and guest.id == guest_info.id %}<i class="fas fa-star"></i> {% endif %}
+                                        {{ guest.full_name }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -92,18 +548,189 @@
     {% endif %}
 </div>
 
+<!-- Include the enhanced JavaScript -->
 <script>
-// AJAX table search
-$('#table-search-form input').on('input', function() {
-    const query = $(this).val();
-    if (query.length > 2) {
-        $.get('{% url "wedding:ajax_table_search" %}', {q: query}, function(data) {
-            if (data.found) {
-                // Handle AJAX results here
-                console.log('Found guest:', data);
+    // Table Map Animation and Interaction Script
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize table animations with staggered delay
+        const tableCircles = document.querySelectorAll('.table-circle');
+        tableCircles.forEach((circle, index) => {
+            setTimeout(() => {
+                circle.classList.add('loaded');
+            }, index * 100);
+        });
+        
+        // Position guest avatars around tables
+        tableCircles.forEach(circle => {
+            positionGuestAvatars(circle);
+        });
+        
+        // Enhanced search functionality
+        initializeSearch();
+        
+        // Table click interactions
+        tableCircles.forEach(circle => {
+            circle.addEventListener('click', function() {
+                handleTableClick(this);
+            });
+        });
+    });
+
+    function positionGuestAvatars(tableCircle) {
+        const avatars = tableCircle.querySelectorAll('.guest-avatar');
+        const totalAvatars = avatars.length;
+        
+        if (totalAvatars === 0) return;
+        
+        const radius = 70;
+        const angleStep = 360 / totalAvatars;
+        
+        avatars.forEach((avatar, index) => {
+            const angle = (angleStep * index) - 90; // Start from top
+            const radian = (angle * Math.PI) / 180;
+            
+            const x = Math.cos(radian) * radius;
+            const y = Math.sin(radian) * radius;
+            
+            // Initial position (hidden)
+            avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+            avatar.style.opacity = '0';
+            
+            // Animate in
+            setTimeout(() => {
+                avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+                avatar.style.opacity = '1';
+            }, 300 + (index * 50));
+        });
+    }
+
+    function handleTableClick(tableCircle) {
+        const tableNumber = tableCircle.dataset.table;
+        
+        // Remove highlights from other tables
+        document.querySelectorAll('.table-circle').forEach(circle => {
+            if (circle !== tableCircle) {
+                circle.classList.remove('highlighted');
+            }
+        });
+        
+        document.querySelectorAll('.table-card').forEach(card => {
+            card.classList.remove('highlighted-card');
+        });
+        
+        // Toggle current table highlight
+        const isHighlighted = tableCircle.classList.toggle('highlighted');
+        
+        if (isHighlighted) {
+            // Highlight corresponding card
+            const tableCard = document.querySelector(`[data-table-card="${tableNumber}"]`);
+            if (tableCard) {
+                tableCard.classList.add('highlighted-card');
+                tableCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Animate guest avatars
+            const avatars = tableCircle.querySelectorAll('.guest-avatar');
+            avatars.forEach((avatar, index) => {
+                setTimeout(() => {
+                    avatar.style.animation = 'bounce 0.6s ease';
+                }, index * 100);
+            });
+            
+            showNotification(`Wybrано stół ${tableNumber}`, 'success');
+        }
+    }
+
+    function initializeSearch() {
+        const searchInput = document.querySelector('#table-search-form input');
+        if (!searchInput) return;
+        
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(searchTimeout);
+            clearTableHighlights();
+            
+            if (query.length < 2) return;
+            
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
+            }, 300);
+        });
+    }
+
+    function performSearch(query) {
+        fetch(`{% url 'wedding:ajax_table_search' %}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.found && data.table_number !== 'Nie przypisano') {
+                    highlightTable(data.table_number);
+                    highlightGuest(data);
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+            });
+    }
+
+    function highlightTable(tableNumber) {
+        const tableCircle = document.querySelector(`[data-table="${tableNumber}"]`);
+        if (tableCircle) {
+            clearTableHighlights();
+            tableCircle.classList.add('highlighted');
+            tableCircle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function highlightGuest(guestData) {
+        // Find and highlight specific guest avatar
+        const allAvatars = document.querySelectorAll('.guest-avatar');
+        allAvatars.forEach(avatar => {
+            avatar.classList.remove('current-guest');
+            if (avatar.title === guestData.guest_name) {
+                avatar.classList.add('current-guest');
             }
         });
     }
-});
+
+    function clearTableHighlights() {
+        document.querySelectorAll('.table-circle').forEach(circle => {
+            circle.classList.remove('highlighted');
+        });
+        document.querySelectorAll('.table-card').forEach(card => {
+            card.classList.remove('highlighted-card');
+        });
+    }
+
+    function showNotification(message, type = 'info') {
+        // Simple notification system
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 250px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="close" onclick="this.parentElement.remove()">
+                <span>&times;</span>
+            </button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+
+    // Reset avatar animations after they complete
+    document.addEventListener('animationend', function(e) {
+        if (e.target.classList.contains('guest-avatar')) {
+            e.target.style.animation = '';
+        }
+    });
 </script>
 {% endblock %}
