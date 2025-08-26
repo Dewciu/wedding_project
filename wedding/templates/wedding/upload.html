@@ -1,0 +1,34 @@
+{% extends 'wedding/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Prześlij Zdjęcie - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Prześlij Swoje Zdjęcie</h2>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-custom">
+                <div class="card-body">
+                    {% crispy form %}
+                </div>
+            </div>
+            
+            <div class="card card-custom mt-4">
+                <div class="card-body">
+                    <h5 style="color: #5d4e37; margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Instrukcje:</h5>
+                    <ul style="color: #6b5b4f;">
+                        <li>Wybierz najlepsze zdjęcia z uroczystości</li>
+                        <li>Dodaj opisowy tytuł i krótki komentarz</li>
+                        <li>Wybierz odpowiednią kategorię</li>
+                        <li>Twoje zdjęcia pojawią się w galerii po zatwierdzeniu przez administratora</li>
+                        <li>Maksymalny rozmiar pliku: 10MB</li>
+                        <li>Akceptowane formaty: JPG, PNG, HEIC</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

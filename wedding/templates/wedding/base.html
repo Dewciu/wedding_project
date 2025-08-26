@@ -1,0 +1,106 @@
+<!-- templates/wedding/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ wedding_info.bride_name }} & {{ wedding_info.groom_name }} - Nasze Wesele{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'wedding/css/styles.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        {% if wedding_info %}
+        <header class="header">
+            <h1 class="couple-names">{{ wedding_info.bride_name }} & {{ wedding_info.groom_name }}</h1>
+            <p class="wedding-date">{{ wedding_info.wedding_date|date:"j F Y" }} • {{ wedding_info.venue_name }}</p>
+        </header>
+        {% endif %}
+
+        <!-- Navigation Menu -->
+        <nav class="nav-menu">
+            <a href="{% url 'wedding:home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <span class="nav-icon"><i class="fas fa-home"></i></span>
+                Strona Główna
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'wedding:upload' %}" class="nav-item {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
+                <span class="nav-icon"><i class="fas fa-camera"></i></span>
+                Prześlij Zdjęcie
+            </a>
+            {% endif %}
+            <a href="{% url 'wedding:gallery' %}" class="nav-item {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">
+                <span class="nav-icon"><i class="fas fa-images"></i></span>
+                Galeria Zdjęć
+            </a>
+            <a href="{% url 'wedding:table_finder' %}" class="nav-item {% if request.resolver_match.url_name == 'table_finder' %}active{% endif %}">
+                <span class="nav-icon"><i class="fas fa-chair"></i></span>
+                Znajdź Swój Stół
+            </a>
+            <a href="{% url 'wedding:schedule' %}" class="nav-item {% if request.resolver_match.url_name == 'schedule' %}active{% endif %}">
+                <span class="nav-icon"><i class="fas fa-clock"></i></span>
+                Harmonogram
+            </a>
+            <a href="{% url 'wedding:menu' %}" class="nav-item {% if request.resolver_match.url_name == 'menu' %}active{% endif %}">
+                <span class="nav-icon"><i class="fas fa-utensils"></i></span>
+                Menu
+            </a>
+        </nav>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- Auth Links -->
+        <div class="auth-links">
+            {% if user.is_authenticated %}
+                <span>Witaj, {{ user.first_name }}!</span>
+                <a href="{% url 'wedding:logout' %}">Wyloguj</a>
+            {% else %}
+                <a href="{% url 'wedding:login' %}">Zaloguj</a>
+                <a href="{% url 'wedding:register' %}">Rejestracja</a>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            {% if wedding_info %}
+            <p>{{ wedding_info.bride_name }} & {{ wedding_info.groom_name }} • {{ wedding_info.wedding_date|date:"j F Y" }}</p>
+            {% endif %}
+            <p class="footer-subtitle">
+                Dziękujemy, że jesteście z nami w tym wyjątkowym dniu! ❤️
+            </p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

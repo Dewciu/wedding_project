@@ -1,0 +1,24 @@
+{{ wedding_info.bride_name }} & {{ wedding_info.groom_name }}
+{{ wedding_info.wedding_date|date:"j F Y" }}
+{{ wedding_info.venue_name }}
+
+Drogi/a {{ guest.user.first_name }},
+
+{{ wedding_info.welcome_message }}
+
+Stworzyliśmy specjalną aplikację weselną, gdzie będziesz mógł/mogła:
+- Przeglądać zdjęcia z uroczystości
+- Przesyłać własne zdjęcia
+- Sprawdzić numer swojego stołu
+- Zobaczyć harmonogram wydarzeń
+- Przejrzeć menu
+
+Twoje dane logowania:
+Nazwa użytkownika: {{ guest.user.username }}
+Hasło: wesele2024
+
+Link do aplikacji: {{ login_url }}
+
+Cieszymy się na spotkanie!
+
+{{ wedding_info.bride_name }} & {{ wedding_info.groom_name }}

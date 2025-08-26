@@ -1,0 +1,49 @@
+{% extends 'wedding/base.html' %}
+
+{% block content %}
+<div class="container">
+    {% if wedding_info %}
+    <div class="welcome-message">
+        <h2>Witamy na naszym weselu!</h2>
+        <p>{{ wedding_info.welcome_message|default:"Cieszymy się, że możecie być z nami w tym wyjątkowym dniu. Ta aplikacja pozwoli Wam dzielić się wspomnieniami, przeglądać zdjęcia i być na bieżąco z harmonogramem uroczystości." }}</p>
+        <p style="margin-top: 15px; font-style: italic;">Pamiętajcie - każde zdjęcie, które prześlecie, zostanie częścią naszej wspólnej opowieści!</p>
+    </div>
+    {% endif %}
+
+    {% if featured_photos %}
+    <h3 class="text-center mb-4" style="color: #5d4e37;">Wyróżnione zdjęcia</h3>
+    <div class="photo-grid">
+        {% for photo in featured_photos %}
+        <div class="photo-item">
+            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+            <div class="photo-overlay">
+                <h5>{{ photo.title }}</h5>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if recent_photos %}
+    <h3 class="text-center mt-5 mb-4" style="color: #5d4e37;">Najnowsze zdjęcia</h3>
+    <div class="photo-grid">
+        {% for photo in recent_photos %}
+        <div class="photo-item">
+            {% if photo.image %}
+                <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+            {% else %}
+                <div class="photo-placeholder">{{ photo.title }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not featured_photos and not recent_photos %}
+    <div class="text-center mt-5">
+        <h3 style="color: #7a6b5d;">Zdjęcia będą dostępne wkrótce!</h3>
+        <p>Goście będą mogli przesyłać zdjęcia po zalogowaniu się.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'wedding/base.html' %}
+
+{% block title %}Menu - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Menu Weselne</h2>
+    
+    {% for course_name, items in menu_items.items %}
+    <div class="menu-section">
+        <h3>
+            {% if 'powitalny' in course_name %}🥂{% elif 'Przystawka' in course_name %}🍤{% elif 'Zupa' in course_name %}🍲{% elif 'główne' in course_name %}🍽️{% elif 'Deser' in course_name %}🍰{% elif 'Napoje' in course_name %}🥤{% else %}🍴{% endif %}
+            {{ course_name }}
+        </h3>
+        {% for item in items %}
+        <div class="menu-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="dish-name">
+                        {{ item.name }}
+                        {% if item.vegetarian %}<span class="badge badge-success ml-2">Vegetarian</span>{% endif %}
+                    </div>
+                    <div class="dish-description">{{ item.description }}</div>
+                    {% if item.allergens %}
+                    <small class="text-muted">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Alergeny: {{ item.allergens }}
+                    </small>
+                    {% endif %}
+                </div>
+                {% if item.price %}
+                <div class="price">{{ item.price }} zł</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <!-- Default menu if no items in database -->
+    <div class="menu-section">
+        <h3>🥂 Koktajl Powitalny</h3>
+        <div class="menu-item">
+            <div class="dish-name">Prosecco z malinami</div>
+            <div class="dish-description">Musujące wino z dodatkiem świeżych malin i mięty</div>
+        </div>
+        <div class="menu-item">
+            <div class="dish-name">Canapé z łososiem</div>
+            <div class="dish-description">Minibagietka z kremem serowym, wędzonym łososiem i kaparami</div>
+        </div>
+    </div>
+
+    <div class="menu-section">
+        <h3>🍽️ Obiad Weselny</h3>
+        <div class="menu-item">
+            <div class="dish-name">Przystawka: Tatar z łososia</div>
+            <div class="dish-description">Świeży łosoś z awokado, kaparami i sosem musztardowo-miodowym</div>
+        </div>
+        <div class="menu-item">
+            <div class="dish-name">Zupa: Żurek staropolski</div>
+            <div class="dish-description">Tradycyjny żurek z białą kiełbasą i jajkiem w chlebowym garnku</div>
+        </div>
+        <div class="menu-item">
+            <div class="dish-name">Danie główne: Polędwica wieprzowa</div>
+            <div class="dish-description">Polędwica w ziołach z grillowanymi warzywami i ziemniakami z rozmarynem</div>
+        </div>
+        <div class="menu-item">
+            <div class="dish-name">Deser: Tiramisu</div>
+            <div class="dish-description">Klasyczne tiramisu z mascarpone i kawą</div>
+        </div>
+    </div>
+
+    <div class="menu-section">
+        <h3>🍰 Słodki Stół</h3>
+        <div class="menu-item">
+            <div class="dish-name">Tort weselny</div>
+            <div class="dish-description">Trzypiętrowy tort z kremem waniliowym i owocami leśnymi</div>
+        </div>
+        <div class="menu-item">
+            <div class="dish-name">Ciastka i pralinki</div>
+            <div class="dish-description">Wybór domowych ciasteczek, makaroników i czekoladek</div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <div class="text-center mt-4">
+        <div class="alert alert-warning">
+            <i class="fas fa-utensils"></i>
+            Jeśli masz specjalne wymagania dietetyczne lub alergie, skontaktuj się z organizatorami przed wydarzeniem.
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+<div class="photo-grid" data-cols="{{ cols }}">
+    {% for photo in photos %}
+    <div class="photo-item" data-toggle="modal" data-target="#photoModal{{ photo.id }}">
+        {% if photo.image %}
+            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+        {% else %}
+            <div class="photo-placeholder">{{ photo.title }}</div>
+        {% endif %}
+        <div class="photo-overlay">
+            <h6>{{ photo.title }}</h6>
+            <small>{{ photo.uploaded_by.first_name }}</small>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoGrid = document.querySelector('.photo-grid');
+    const cols = photoGrid.dataset.cols || 3;
+    photoGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+});
+</script>
