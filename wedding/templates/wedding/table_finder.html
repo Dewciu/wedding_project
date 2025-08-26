@@ -63,7 +63,7 @@
     width: 65px;  /* Increased from 55px */
     height: 200px;  /* Increased from 180px */
     border-radius: 12px;
-    left: 40px;   /* Adjusted for centering */
+    left: 70px;   /* Adjusted for centering */
     top: 200px;   /* Centered vertically */
 }
 
@@ -72,7 +72,7 @@
     width: 500px;  /* Increased from 350px */
     height: 65px;  /* Increased from 55px */
     border-radius: 12px;
-    left: 250px;  /* Centered horizontally */
+    left: 200px;  /* Centered horizontally */
     top: 520px;   /* Moved down to bottom */
 }
 
@@ -81,46 +81,46 @@
     width: 600px;  /* Increased from 350px */
     height: 65px;  /* Increased from 55px */
     border-radius: 12px;
-    left: 250px;  /* Centered horizontally */
+    left: 200px;  /* Centered horizontally */
     top: 15px;    /* Top position */
 }
 
-/* Circular tables with increased spacing and shifted right */
-/* Top row: tables 4, 6, 8, 10 - evenly spaced with larger gaps */
+/* Circular tables centered around table 1 with larger chessboard spacing */
+/* Top row: tables 4, 6, 8, 10 - moved to center the chessboard */
 .table-4 {
-    left: 200px;  /* Shifted right and increased spacing */
-    top: 160px;   /* Centered vertically */
+    left: 220px;  /* Moved right to center the pattern */
+    top: 180px;   /* Moved down slightly */
 }
 
 .table-6 {
-    left: 360px;  /* Increased distance: 160px spacing */
-    top: 160px;   /* Same horizontal line */
+    left: 360px;  /* Spacing: 140px from table 4 */
+    top: 180px;   /* Same horizontal line */
 }
 
 .table-8 {
-    left: 520px;  /* Increased distance: 160px spacing */
-    top: 160px;   /* Same horizontal line */
+    left: 500px;  /* Spacing: 140px from table 6 */
+    top: 180px;   /* Same horizontal line */
 }
 
 .table-10 {
-    left: 680px;  /* Increased distance: 160px spacing */
-    top: 160px;   /* Same horizontal line */
+    left: 640px;  /* Spacing: 140px from table 8 */
+    top: 180px;   /* Same horizontal line */
 }
 
-/* Bottom row: tables 5, 7, 9 - evenly spaced with offset and larger gaps */
+/* Bottom row: tables 5, 7, 9 - offset for chessboard pattern */
 .table-5 {
-    left: 280px;  /* Offset for chessboard pattern, shifted right */
-    top: 360px;   /* Increased vertical spacing: 200px */
+    left: 290px;  /* Offset by 70px for chessboard pattern, moved right */
+    top: 330px;   /* Vertical spacing: 150px from top row, moved down */
 }
 
 .table-7 {
-    left: 440px;  /* Increased distance: 160px spacing */
-    top: 360px;   /* Same horizontal line */
+    left: 430px;  /* Spacing: 140px from table 5 */
+    top: 330px;   /* Same horizontal line */
 }
 
 .table-9 {
-    left: 600px;  /* Increased distance: 160px spacing */
-    top: 360px;   /* Same horizontal line */
+    left: 570px;  /* Spacing: 140px from table 7 */
+    top: 330px;   /* Same horizontal line */
 }
 
 /* Adjust table number font size for larger tables */
@@ -142,6 +142,15 @@
     box-shadow: 
         0 10px 30px rgba(93, 78, 55, 0.3),
         inset 0 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Prevent avatar position changes during table hover */
+.table-circle:hover .guest-avatar {
+    transform: var(--avatar-position) scale(1) !important;
+}
+
+.table-circle:hover .guest-avatar:hover {
+    transform: var(--avatar-position) scale(1.3) !important;
 }
 
 .table-circle.highlighted {
@@ -202,6 +211,7 @@
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     cursor: pointer;
+    z-index: 20; /* Ensure avatars stay above table hover effects */
 }
 
 .guest-avatar:hover {
@@ -306,38 +316,38 @@
     
     /* Maintain increased spacing proportionally */
     .table-4 {
-        left: 160px;  /* 0.8 scale, shifted right */
-        top: 128px;
+        left: 176px;  /* 0.8 scale, centered */
+        top: 144px;
     }
 
     .table-6 {
-        left: 288px;  /* Increased distance maintained */
-        top: 128px;
+        left: 288px;  /* Proportional spacing: 112px */
+        top: 144px;
     }
 
     .table-8 {
-        left: 416px;  /* Increased distance maintained */
-        top: 128px;
+        left: 400px;  /* Proportional spacing: 112px */
+        top: 144px;
     }
 
     .table-10 {
-        left: 544px;  /* Increased distance maintained */
-        top: 128px;
+        left: 512px;  /* Proportional spacing: 112px */
+        top: 144px;
     }
 
     .table-5 {
-        left: 224px;  /* Proportional offset, shifted right */
-        top: 288px;   /* Proportional vertical spacing */
+        left: 232px;  /* Proportional offset for chessboard */
+        top: 264px;   /* Proportional spacing: 120px */
     }
 
     .table-7 {
-        left: 352px;  /* Increased distance maintained */
-        top: 288px;
+        left: 344px;  /* Proportional spacing: 112px */
+        top: 264px;
     }
 
     .table-9 {
-        left: 480px;  /* Increased distance maintained */
-        top: 288px;
+        left: 456px;  /* Proportional spacing: 112px */
+        top: 264px;
     }
     
     .table-number {
@@ -368,38 +378,38 @@
     
     /* Maintain increased spacing at smaller scale */
     .table-4 {
-        left: 140px;  /* 0.7 scale, shifted right */
-        top: 112px;
+        left: 154px;  /* 0.7 scale, centered */
+        top: 126px;
     }
 
     .table-6 {
-        left: 252px;  /* Increased distance maintained */
-        top: 112px;
+        left: 252px;  /* Proportional spacing: 98px */
+        top: 126px;
     }
 
     .table-8 {
-        left: 364px;  /* Increased distance maintained */
-        top: 112px;
+        left: 350px;  /* Proportional spacing: 98px */
+        top: 126px;
     }
 
     .table-10 {
-        left: 476px;  /* Increased distance maintained */
-        top: 112px;
+        left: 448px;  /* Proportional spacing: 98px */
+        top: 126px;
     }
 
     .table-5 {
-        left: 196px;  /* Proportional offset, shifted right */
-        top: 252px;   /* Proportional vertical spacing */
+        left: 203px;  /* Proportional offset for chessboard */
+        top: 231px;   /* Proportional spacing: 105px */
     }
 
     .table-7 {
-        left: 308px;  /* Increased distance maintained */
-        top: 252px;
+        left: 301px;  /* Proportional spacing: 98px */
+        top: 231px;
     }
 
     .table-9 {
-        left: 420px;  /* Increased distance maintained */
-        top: 252px;
+        left: 399px;  /* Proportional spacing: 98px */
+        top: 231px;
     }
     
     .table-number {
@@ -686,62 +696,93 @@
         if (totalAvatars === 0) return;
         
         // Different positioning for rectangular vs circular tables
-        const isRectangular = (tableNumber === '2' || tableNumber === '3');
+        const isRectangular = (tableNumber === '1' || tableNumber === '2' || tableNumber === '3');
         
         if (isRectangular) {
-            // Position guests around rectangular table (sides)
-            const sideLength = 65; // Half the width/height of rectangular table
+            // Position guests around rectangular tables
+            let tableWidth = 200; // Default width
             
-            avatars.forEach((avatar, index) => {
-                let x = 0, y = 0;
+            // Adjust based on table size
+            if (tableNumber === '1') {
+                // Vertical rectangle - position guests only on the LEFT side
+                const tableHeight = 180; // Approximate height of table 1
                 
-                if (totalAvatars <= 4) {
-                    // Simple 4-sides positioning
-                    switch (index % 4) {
-                        case 0: x = -sideLength; y = 0; break;  // Left
-                        case 1: x = sideLength; y = 0; break;   // Right  
-                        case 2: x = 0; y = -30; break;          // Top
-                        case 3: x = 0; y = 30; break;           // Bottom
-                    }
-                } else {
-                    // Distribute evenly around perimeter
-                    const perimeter = (sideLength * 2 + 30 * 2) * 2; // Approximate perimeter
-                    const step = perimeter / totalAvatars;
-                    const position = step * index;
+                avatars.forEach((avatar, index) => {
+                    let x = 0, y = 0;
                     
-                    if (position < sideLength * 2) {
-                        // Top side
-                        x = -sideLength + (position / sideLength);
-                        y = -30;
-                    } else if (position < sideLength * 2 + 60) {
-                        // Right side
-                        x = sideLength;
-                        y = -30 + ((position - sideLength * 2) / 60) * 60;
-                    } else if (position < sideLength * 4 + 60) {
-                        // Bottom side
-                        x = sideLength - ((position - sideLength * 2 - 60) / sideLength);
-                        y = 30;
-                    } else {
-                        // Left side
-                        x = -sideLength;
-                        y = 30 - ((position - sideLength * 4 - 60) / 60) * 60;
-                    }
+                    // Position all guests on the left side vertically spaced
+                    const spacing = tableHeight / (totalAvatars + 1);
+                    x = -60; // Fixed position on the left side
+                    y = -tableHeight/2 + spacing * (index + 1);
+                    
+                    // Store position as CSS custom property
+                    avatar.style.setProperty('--avatar-position', `translate(${x}px, ${y}px)`);
+                    
+                    // Apply initial position with animation
+                    avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    avatar.style.opacity = '0';
+                    
+                    // Animate in with delay
+                    setTimeout(() => {
+                        avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+                        avatar.style.opacity = '1';
+                    }, 200 + (index * 50));
+                });
+                
+            } else {
+                // Horizontal rectangles (tables 2 & 3) - position along top and bottom edges with much larger spacing between guests
+                if (tableNumber === '2') {
+                    tableWidth = 500; // Much larger for spacing between guests
+                } else if (tableNumber === '3') {
+                    tableWidth = 600; // Much larger for spacing between guests
                 }
                 
-                // Apply position with smooth animation
-                avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
-                avatar.style.opacity = '0';
-                
-                // Animate in with delay
-                setTimeout(() => {
-                    avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-                    avatar.style.opacity = '1';
-                }, 200 + (index * 50));
-            });
+                avatars.forEach((avatar, index) => {
+                    let x = 0, y = 0;
+                    
+                    if (totalAvatars <= 2) {
+                        // Simple top/bottom positioning for few guests
+                        if (index === 0) {
+                            x = 0; y = -60; // Back to original distance from table
+                        } else {
+                            x = 0; y = 60;  // Back to original distance from table
+                        }
+                    } else {
+                        // Distribute evenly along top and bottom edges with much larger gaps between guests
+                        const guestsPerSide = Math.ceil(totalAvatars / 2);
+                        const spacing = tableWidth / (guestsPerSide + 1); // This creates larger gaps between guests
+                        
+                        if (index < guestsPerSide) {
+                            // Top edge - evenly spaced with much larger gaps between guests
+                            x = -tableWidth/2 + spacing * (index + 1);
+                            y = -60; // Original distance from table (was -90)
+                        } else {
+                            // Bottom edge - evenly spaced with much larger gaps between guests
+                            const bottomIndex = index - guestsPerSide;
+                            x = -tableWidth/2 + spacing * (bottomIndex + 1);
+                            y = 60; // Original distance from table (was 90)
+                        }
+                    }
+                    
+                    // Store position as CSS custom property
+                    avatar.style.setProperty('--avatar-position', `translate(${x}px, ${y}px)`);
+                    
+                    // Apply initial position with animation
+                    avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    avatar.style.opacity = '0';
+                    
+                    // Animate in with delay
+                    setTimeout(() => {
+                        avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+                        avatar.style.opacity = '1';
+                    }, 200 + (index * 50));
+                });
+            }
         } else {
-            // Circular table positioning (original logic)
-            const radius = 60;
+            // Circular table positioning with reduced radius
+            const radius = 55; // Reduced from 70 to bring avatars closer to tables
             const angleStep = 360 / totalAvatars;
             
             avatars.forEach((avatar, index) => {
@@ -751,7 +792,10 @@
                 const x = Math.cos(radian) * radius;
                 const y = Math.sin(radian) * radius;
                 
-                // Apply position with smooth animation
+                // Store position as CSS custom property
+                avatar.style.setProperty('--avatar-position', `translate(${x}px, ${y}px)`);
+                
+                // Apply initial position with animation
                 avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
                 avatar.style.opacity = '0';
                 
@@ -764,21 +808,17 @@
             });
         }
         
-        // Add hover effects
+        // Add hover effects that preserve position (unchanged)
         avatars.forEach(avatar => {
-            const originalTransform = avatar.style.transform;
-            
             avatar.addEventListener('mouseenter', function() {
-                const match = originalTransform.match(/translate\(([^)]+)\)/);
-                if (match) {
-                    const coords = match[1];
-                    this.style.transform = `translate(${coords}) scale(1.3)`;
-                }
+                const position = this.style.getPropertyValue('--avatar-position');
+                this.style.transform = `${position} scale(1.3)`;
                 showGuestTooltip(this);
             });
             
             avatar.addEventListener('mouseleave', function() {
-                this.style.transform = originalTransform;
+                const position = this.style.getPropertyValue('--avatar-position');
+                this.style.transform = `${position} scale(1)`;
                 hideGuestTooltip();
             });
         });
