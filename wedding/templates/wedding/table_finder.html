@@ -28,27 +28,25 @@
 }
 
 .table-map {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr); /* More columns for better control */
-    grid-template-rows: repeat(6, 1fr);
-    gap: 30px;
-    justify-items: center;
-    align-items: center;
-    min-height: 700px;
     position: relative;
-    z-index: 1;
+    width: 100%;
+    height: 600px; /* Increased height for larger layout */
+    background: transparent;
+    margin: 20px auto;
+    max-width: 900px; /* Increased max width */
 }
 
+/* Use absolute positioning for precise table placement */
 .table-circle {
-    width: 110px;
-    height: 110px;
+    position: absolute;
+    width: 85px; /* Increased from 70px */
+    height: 85px;
     border-radius: 50%;
     background: linear-gradient(145deg, #d4c4a8, #c8b99c);
     border: 3px solid #b8a082;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     box-shadow: 
         0 6px 20px rgba(93, 78, 55, 0.2),
         inset 0 2px 0 rgba(255, 255, 255, 0.1);
@@ -58,25 +56,80 @@
     transform: scale(0.8);
 }
 
-/* Rectangular tables - default size for tables 2 and 3 */
-.table-2, .table-3 {
-    width: 220px;
-    height: 70px;
-    border-radius: 18px;
-}
-
-/* Special styling for table 1 - taller and narrower */
+/* Rectangular tables repositioned with increased sizes */
 .table-1 {
-    width: 70px;
-    height: 220px;
-    border-radius: 18px;
-    justify-self: start; /* Align to the left */
-    margin-left: 20px;
+    background: linear-gradient(145deg, #ffffff, #e4b048);
+    position: absolute;
+    width: 65px;  /* Increased from 55px */
+    height: 200px;  /* Increased from 180px */
+    border-radius: 12px;
+    left: 40px;   /* Adjusted for centering */
+    top: 200px;   /* Centered vertically */
 }
 
-/* Add hover effect for table 1 without rotation */
-.table-1:hover {
-    transform: scale(1.08);
+.table-2 {
+    position: absolute;
+    width: 500px;  /* Increased from 350px */
+    height: 65px;  /* Increased from 55px */
+    border-radius: 12px;
+    left: 250px;  /* Centered horizontally */
+    top: 520px;   /* Moved down to bottom */
+}
+
+.table-3 {
+    position: absolute;
+    width: 600px;  /* Increased from 350px */
+    height: 65px;  /* Increased from 55px */
+    border-radius: 12px;
+    left: 250px;  /* Centered horizontally */
+    top: 15px;    /* Top position */
+}
+
+/* Circular tables with increased spacing and shifted right */
+/* Top row: tables 4, 6, 8, 10 - evenly spaced with larger gaps */
+.table-4 {
+    left: 200px;  /* Shifted right and increased spacing */
+    top: 160px;   /* Centered vertically */
+}
+
+.table-6 {
+    left: 360px;  /* Increased distance: 160px spacing */
+    top: 160px;   /* Same horizontal line */
+}
+
+.table-8 {
+    left: 520px;  /* Increased distance: 160px spacing */
+    top: 160px;   /* Same horizontal line */
+}
+
+.table-10 {
+    left: 680px;  /* Increased distance: 160px spacing */
+    top: 160px;   /* Same horizontal line */
+}
+
+/* Bottom row: tables 5, 7, 9 - evenly spaced with offset and larger gaps */
+.table-5 {
+    left: 280px;  /* Offset for chessboard pattern, shifted right */
+    top: 360px;   /* Increased vertical spacing: 200px */
+}
+
+.table-7 {
+    left: 440px;  /* Increased distance: 160px spacing */
+    top: 360px;   /* Same horizontal line */
+}
+
+.table-9 {
+    left: 600px;  /* Increased distance: 160px spacing */
+    top: 360px;   /* Same horizontal line */
+}
+
+/* Adjust table number font size for larger tables */
+.table-number {
+    font-size: 1.8rem; /* Increased from 1.6rem */
+    font-weight: bold;
+    color: #5d4e37;
+    z-index: 2;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .table-circle.loaded {
@@ -107,19 +160,6 @@
 @keyframes gentle-rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
-}
-
-.table-number {
-    font-size: 2.2rem;
-    font-weight: bold;
-    color: #5d4e37;
-    z-index: 2;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-.table-circle.highlighted .table-number {
-    color: #f5f0e8;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .table-info {
@@ -243,107 +283,153 @@
 /* Responsive Design */
 @media (max-width: 968px) {
     .table-map {
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(6, 1fr);
-        gap: 25px;
-        min-height: 600px;
+        height: 480px; /* Adjusted height */
+        max-width: 720px; /* Proportional scaling */
+        transform: scale(0.8);
+        transform-origin: center top;
     }
+    
+    .table-circle {
+        width: 68px; /* Proportionally scaled */
+        height: 68px;
+    }
+    
     .table-1 {
-        width: 55px;
-        height: 170px;
+        width: 52px;
+        height: 160px;
     }
+    
     .table-2, .table-3 {
-        width: 170px;
-        height: 55px;
+        width: 320px;
+        height: 52px;
     }
-    .table-1 {
-        transform: rotate(90deg);
-        transform-origin: center;
-        left: -60px;
+    
+    /* Maintain increased spacing proportionally */
+    .table-4 {
+        left: 160px;  /* 0.8 scale, shifted right */
+        top: 128px;
     }
-    /* Reposition for smaller screens */
-    .table-1 { grid-column: 1 / 2; grid-row: 2 / 6; }
-    .table-2 { grid-column: 2 / 4; grid-row: 6 / 7; }
-    .table-3 { grid-column: 2 / 5; grid-row: 1 / 2; }
-    .table-4 { grid-column: 2 / 3; grid-row: 2 / 3; }
-    .table-5 { grid-column: 2 / 3; grid-row: 4 / 5; }
-    .table-6 { grid-column: 3 / 4; grid-row: 3 / 4; }
-    .table-7 { grid-column: 3 / 4; grid-row: 5 / 6; }
-    .table-8 { grid-column: 4 / 5; grid-row: 3 / 4; }
-    .table-9 { grid-column: 4 / 5; grid-row: 5 / 6; }
-    .table-10 { grid-column: 4 / 5; grid-row: 2 / 3; }
+
+    .table-6 {
+        left: 288px;  /* Increased distance maintained */
+        top: 128px;
+    }
+
+    .table-8 {
+        left: 416px;  /* Increased distance maintained */
+        top: 128px;
+    }
+
+    .table-10 {
+        left: 544px;  /* Increased distance maintained */
+        top: 128px;
+    }
+
+    .table-5 {
+        left: 224px;  /* Proportional offset, shifted right */
+        top: 288px;   /* Proportional vertical spacing */
+    }
+
+    .table-7 {
+        left: 352px;  /* Increased distance maintained */
+        top: 288px;
+    }
+
+    .table-9 {
+        left: 480px;  /* Increased distance maintained */
+        top: 288px;
+    }
+    
+    .table-number {
+        font-size: 1.4rem;
+    }
 }
 
 @media (max-width: 768px) {
     .table-map {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        min-height: 800px;
+        height: 420px;
+        transform: scale(0.7);
     }
     
     .table-circle {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .table-1 {
+        width: 45px;
+        height: 140px;
     }
     
     .table-2, .table-3 {
-        width: 120px;
-        height: 60px;
+        width: 280px;
+        height: 45px;
     }
     
-    .table-1 {
-        width: 120px;
-        height: 60px;
+    /* Maintain increased spacing at smaller scale */
+    .table-4 {
+        left: 140px;  /* 0.7 scale, shifted right */
+        top: 112px;
+    }
+
+    .table-6 {
+        left: 252px;  /* Increased distance maintained */
+        top: 112px;
+    }
+
+    .table-8 {
+        left: 364px;  /* Increased distance maintained */
+        top: 112px;
+    }
+
+    .table-10 {
+        left: 476px;  /* Increased distance maintained */
+        top: 112px;
+    }
+
+    .table-5 {
+        left: 196px;  /* Proportional offset, shifted right */
+        top: 252px;   /* Proportional vertical spacing */
+    }
+
+    .table-7 {
+        left: 308px;  /* Increased distance maintained */
+        top: 252px;
+    }
+
+    .table-9 {
+        left: 420px;  /* Increased distance maintained */
+        top: 252px;
     }
     
     .table-number {
-        font-size: 1.6rem;
-    }
-    
-    .guest-avatar {
-        width: 24px;
-        height: 24px;
-        font-size: 0.6rem;
-    }
-    
-    .table-1 {
-        transform: none;
-        left: 0;
-    }
-    
-    /* Reset positioning for mobile - simple 2-column grid */
-    .table-1, .table-2, .table-3, .table-4, .table-5, 
-    .table-6, .table-7, .table-8, .table-9, .table-10 {
-        grid-column: auto;
-        grid-row: auto;
+        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 480px) {
-    .table-map-container {
-        padding: 25px 15px;
-    }
-    
     .table-map {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        min-height: 1000px;
+        height: 360px;
+        transform: scale(0.6);
     }
     
     .table-circle {
-        width: 70px;
-        height: 70px;
+        width: 51px;
+        height: 51px;
+    }
+    
+    .table-1 {
+        width: 39px;
+        height: 120px;
     }
     
     .table-2, .table-3 {
-        width: 100px;
-        height: 50px;
+        width: 240px;
+        height: 39px;
     }
     
-    .guest-avatar {
-        width: 20px;
-        height: 20px;
-        font-size: 0.5rem;
+    .table-number {
+        font-size: 1rem;
     }
 }
 </style>
