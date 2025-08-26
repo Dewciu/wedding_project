@@ -1,4 +1,4 @@
-﻿Imię;Nazwisko;*Typ*;Stół
+﻿Firstname;Lastname;*Typ*;Table
 Jolanta;Cadera;*gość*;2
 Tomasz;Cadera;*gość*;2
 Barbara;Cadera;*gość*;4
@@ -28,7 +28,7 @@ Stanisław;Starz;*gość*;9
 Hanna;Starz;*gość*;9
 Olga;Adamczyk;*gość*;4
 Karol;Adamczyk;*gość*;4
-Joanna;Ćwierz;*gość*;x
+Joanna;Ćwierz;*gość*;1
 Marta;Głąbek;*gość*;2
 Michał;Głąbek;*gość*;2
 Filip;Ćwierz;*gość*;2
@@ -82,8 +82,8 @@ Barbara;Lis;*gość*;3
 Stanisław;Lis;*gość*;3
 Renata;Dzięcioł;*gość*;3
 Marcin;Dzięcioł;*gość*;3
-Kacper;Król;*gość*;x
-osoba towarzysząca;Kacpra Króla;*osoba towarzysząca*;x
+Kacper;Król;*gość*;1
+Emilia;Połednik;*gość*;1
 Dorota;Król;*gość*;3
 Jarosław;Król;*gość*;3
 Stefan;Król;*gość*;3

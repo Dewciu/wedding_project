@@ -21,6 +21,7 @@ class Guest(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15, blank=True, verbose_name="Numer telefonu")
     table_number = models.IntegerField(null=True, blank=True, verbose_name="Numer stołu")
+    guest_type = models.CharField(max_length=50, blank=True, verbose_name="Typ gościa")
     dietary_requirements = models.TextField(blank=True, verbose_name="Wymagania dietetyczne")
     plus_one = models.BooleanField(default=False, verbose_name="Osoba towarzysząca")
     confirmed = models.BooleanField(default=True, verbose_name="Potwierdzony")
