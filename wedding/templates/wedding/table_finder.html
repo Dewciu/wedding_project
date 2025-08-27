@@ -129,15 +129,15 @@
 
 /* Guest Avatars */
 .guest-avatar {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: linear-gradient(145deg, #8b6f47, #5d4e37);
     border: 2px solid #f5f0e8;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: #f5f0e8;
     font-weight: bold;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -145,20 +145,30 @@
     transition: all 0.3s ease;
     position: absolute;
     z-index: 1000;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 .guest-avatar:hover {
-    transform: scale(1.3);
-    border-color: #d4a574;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transform: scale(1.4) !important; /* More prominent hover effect */
+    border-color: #d4a574 !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+    z-index: 9999 !important;
 }
 
 .guest-avatar.current-guest {
     background: linear-gradient(145deg, #d4a574, #b8935f);
     border-color: #2c1810;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     animation: glow-pulse 2s infinite;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    font-weight: 700 !important;
+    border-width: 3px !important;
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.6), 0 0 0 2px rgba(212, 165, 116, 0.3) !important;
 }
 
 @keyframes glow-pulse {
@@ -322,11 +332,15 @@
         width: 20px;
         height: 20px;
         font-size: 0.6rem;
+        min-width: 18px !important;
+        min-height: 18px !important;
     }
     
     .guest-avatar.current-guest {
         width: 24px;
         height: 24px;
+        min-width: 22px !important;
+        min-height: 22px !important;
     }
 }
 
@@ -340,15 +354,19 @@
     }
     
     .guest-avatar {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         font-size: 0.5rem;
         border-width: 1px;
+        min-width: 14px !important;
+        min-height: 14px !important;
     }
     
     .guest-avatar.current-guest {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
+        min-width: 18px !important;
+        min-height: 18px !important;
     }
 }
 

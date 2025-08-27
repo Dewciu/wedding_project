@@ -53,7 +53,7 @@ function positionGuestAvatars(tableCircle) {
         
         if (tableShape === 'rectangular' || tableShape === 'square') {
             // Rectangular table positioning logic
-            const margin = 35; // Distance from table edge
+            const margin = 35; // Reduced from 45 to 35 for closer positioning
             
             if (tableWidth > tableHeight) {
                 // Horizontal table - guests at top and bottom
@@ -80,7 +80,7 @@ function positionGuestAvatars(tableCircle) {
             }
         } else {
             // Circular table positioning (original logic)
-            const radius = 60; // Distance from table center
+            const radius = 55; // Reduced from 75 to 55 for better positioning closer to table
             const angleStep = (360 / totalAvatars);
             const angle = angleStep * index - 90; // Start from top
             const radian = (angle * Math.PI) / 180;

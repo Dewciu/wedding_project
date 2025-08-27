@@ -9,7 +9,17 @@ class WeddingTableMap {
         this.currentGuestInfo = window.weddingData?.currentGuestInfo || null;
         this.mapBounds = { width: 900, height: 600 }; // Virtual coordinates
         
-        console.log('🏗️ Initializing Wedding Table Map...');
+        // Mobile responsiveness
+        this.isMobile = window.innerWidth <= 768;
+        this.isSmallMobile = window.innerWidth <= 480;
+        this.mobileScale = 1.0; // Will be set in createMap()
+        this.minGuestZoom = -0.5; // Will be adjusted in createMap()
+        
+        console.log('🏗️ Initializing Wedding Table Map...', {
+            isMobile: this.isMobile,
+            isSmallMobile: this.isSmallMobile,
+            minGuestZoom: this.minGuestZoom
+        });
         this.init();
     }
 
@@ -31,33 +41,40 @@ class WeddingTableMap {
         console.log('🗺️ Creating responsive Leaflet map...');
         
         const isMobile = window.innerWidth <= 768;
-        console.log('📱 Mobile device:', isMobile);
+        const isSmallMobile = window.innerWidth <= 480;
+        console.log('📱 Mobile device:', isMobile, 'Small mobile:', isSmallMobile);
         
         // Clear any existing map
         if (this.map) {
             this.map.remove();
         }
 
+        // Calculate responsive scaling factors
+        this.mobileScale = isMobile ? (isSmallMobile ? 0.6 : 0.75) : 1.0;
+        this.minGuestZoom = isMobile ? -2 : -1; // Allow guests to be visible at default zoom levels
+        
         this.map = L.map('wedding-map', {
             crs: L.CRS.Simple,
-            minZoom: isMobile ? -2 : -1,
-            maxZoom: isMobile ? 1 : 2,
+            minZoom: isMobile ? -2.5 : -1.5,
+            maxZoom: isMobile ? 1.5 : 2.5,
             zoomControl: true,
             attributionControl: false,
-            scrollWheelZoom: !isMobile, // Disable on mobile to prevent conflicts
+            scrollWheelZoom: !isMobile,
             doubleClickZoom: true,
             touchZoom: isMobile,
             dragging: true,
             tap: isMobile,
-            tapTolerance: isMobile ? 20 : 10, // Larger tolerance on mobile
-            // CRITICAL: Prevent CSS transforms interfering
+            tapTolerance: isMobile ? 20 : 10,
             renderer: L.canvas({ padding: 0.5 })
         });
 
-        // Set bounds based on our virtual coordinate system
-        const bounds = [[0, 0], [this.mapBounds.height, this.mapBounds.width]];
+        // Set bounds based on our virtual coordinate system with responsive scaling
+        const scaledWidth = this.mapBounds.width * this.mobileScale;
+        const scaledHeight = this.mapBounds.height * this.mobileScale;
+        const bounds = [[0, 0], [scaledHeight, scaledWidth]];
+        
         this.map.fitBounds(bounds);
-        this.map.setMaxBounds([[-50, -50], [this.mapBounds.height + 50, this.mapBounds.width + 50]]);
+        this.map.setMaxBounds([[-50, -50], [scaledHeight + 50, scaledWidth + 50]]);
 
         // Custom zoom control positioning
         this.map.zoomControl.setPosition('topright');
@@ -70,14 +87,22 @@ class WeddingTableMap {
             this.setupMobileOptimizations();
         }
 
-        console.log('✅ Map created with bounds:', bounds);
+        // Listen for zoom changes to hide/show guests
+        this.map.on('zoomend', () => {
+            this.handleZoomChange();
+        });
+
+        console.log('✅ Map created with scaled bounds:', bounds, 'Scale:', this.mobileScale, 'MinGuestZoom:', this.minGuestZoom);
     }
 
     addVenueBackground() {
-        // Venue outline
+        // Venue outline with responsive scaling
+        const scaledWidth = this.mapBounds.width * this.mobileScale;
+        const scaledHeight = this.mapBounds.height * this.mobileScale;
+        
         const venueOutline = L.rectangle([
-            [50, 50], 
-            [this.mapBounds.height - 50, this.mapBounds.width - 50]
+            [50 * this.mobileScale, 50 * this.mobileScale], 
+            [scaledHeight - 50 * this.mobileScale, scaledWidth - 50 * this.mobileScale]
         ], {
             color: '#d4c4a8',
             fillColor: '#f8f5f0',
@@ -130,11 +155,18 @@ class WeddingTableMap {
     }
 
     createResponsiveTableMarker(table) {
-        // Use database coordinates or fallbacks
-        const x = parseFloat(table.map_x) || 450;
-        const y = parseFloat(table.map_y) || 300;
-        const width = parseFloat(table.map_width) || 85;
-        const height = parseFloat(table.map_height) || 85;
+        // Use database coordinates with responsive scaling
+        const baseX = parseFloat(table.map_x) || 450;
+        const baseY = parseFloat(table.map_y) || 300;
+        const baseWidth = parseFloat(table.map_width) || 85;
+        const baseHeight = parseFloat(table.map_height) || 85;
+        
+        // Apply mobile scaling
+        const x = baseX * this.mobileScale;
+        const y = baseY * this.mobileScale;
+        const width = baseWidth * this.mobileScale;
+        const height = baseHeight * this.mobileScale;
+        
         const shape = table.shape || 'circular';
         const color = table.color || '#d4c4a8';
         const borderColor = table.border_color || '#b8a082';
@@ -150,7 +182,7 @@ class WeddingTableMap {
 
         let tableMarker;
 
-        // Create table shape
+        // Create table shape with responsive sizing
         if (shape === 'rectangular' || shape === 'square') {
             const bounds = [
                 [y - height/2, x - width/2],
@@ -161,8 +193,7 @@ class WeddingTableMap {
                 color: strokeColor,
                 fillColor: fillColor,
                 fillOpacity: 0.8,
-                weight: 3,
-                // CRITICAL: Disable CSS interactions that cause jumping
+                weight: Math.max(2, 3 * this.mobileScale),
                 interactive: true,
                 bubblingMouseEvents: false,
                 className: 'table-shape'
@@ -175,15 +206,17 @@ class WeddingTableMap {
                 color: strokeColor,
                 fillColor: fillColor,
                 fillOpacity: 0.8,
-                weight: 3,
-                // CRITICAL: Disable CSS interactions
+                weight: Math.max(2, 3 * this.mobileScale),
                 interactive: true,
                 bubblingMouseEvents: false,
                 className: 'table-shape'
             }).addTo(this.map);
         }
 
-        // Create table number label - SEPARATE from table shape
+        // Create table number label with responsive sizing
+        const labelSize = Math.max(30, 40 * this.mobileScale);
+        const fontSize = Math.max(0.9, 1.2 * this.mobileScale);
+        
         const labelMarker = L.marker(coords, {
             icon: L.divIcon({
                 className: 'table-number-marker',
@@ -192,34 +225,36 @@ class WeddingTableMap {
                     color: ${isHighlighted ? '#f5f0e8' : '#5d4e37'}; 
                     border: 2px solid ${strokeColor}; 
                     border-radius: ${shape === 'circular' ? '50%' : '6px'};
-                    width: 40px; height: 40px;
+                    width: ${labelSize}px; height: ${labelSize}px;
                     display: flex; align-items: center; justify-content: center;
-                    font-weight: bold; font-size: 1.2rem;
+                    font-weight: bold; font-size: ${fontSize}rem;
                     box-shadow: 0 2px 8px rgba(93, 78, 55, 0.3);
                     cursor: pointer;
                     user-select: none;
                     pointer-events: all;
                 ">${table.number}</div>`,
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
+                iconSize: [labelSize, labelSize],
+                iconAnchor: [labelSize/2, labelSize/2]
             }),
             interactive: true,
             bubblingMouseEvents: false
         }).addTo(this.map);
 
-        // Store markers
+        // Store markers with scaled coordinates
         this.tableMarkers[table.number] = {
             shape: tableMarker,
             label: labelMarker,
             table: table,
             coords: coords,
-            size: size
+            size: size,
+            baseCoords: [baseY, baseX], // Store original coordinates
+            baseSize: [baseWidth, baseHeight]
         };
 
         // Setup interactions - ONLY on the label to prevent jumping
         this.setupTableInteractions(table.number, labelMarker);
 
-        // Add guest avatars
+        // Add guest avatars if zoom level allows
         if (table.guest_list && table.guest_list.length > 0) {
             this.addGuestAvatars(table, coords, shape, size);
         }
@@ -383,38 +418,65 @@ class WeddingTableMap {
         const guests = table.guest_list;
         const totalGuests = guests.length;
         
+        console.log(`👥 Adding ${totalGuests} guest avatars for table ${table.number}`);
+        
+        // Use the passed coords directly - they are already correctly calculated and scaled
+        const actualCenter = coords;
+        
+        console.log(`🎯 Table ${table.number} center:`, actualCenter, 'shape:', shape, 'size:', size);
+        
         guests.forEach((guest, index) => {
             const isCurrent = this.currentGuestInfo && this.currentGuestInfo.id === guest.id;
             let avatarCoords;
 
             if (shape === 'rectangular' || shape === 'square') {
-                avatarCoords = this.calculateRectangularAvatarPosition(coords, size, index, totalGuests);
+                avatarCoords = this.calculateRectangularAvatarPosition(actualCenter, size, index, totalGuests);
             } else {
-                avatarCoords = this.calculateCircularAvatarPosition(coords, index, totalGuests);
+                avatarCoords = this.calculateCircularAvatarPosition(actualCenter, index, totalGuests);
             }
 
             if (avatarCoords) {
-                this.createGuestAvatar(guest, avatarCoords, isCurrent, table.number, index + 1);
+                const avatar = this.createGuestAvatar(guest, avatarCoords, isCurrent, table.number, index + 1);
+                if (avatar) {
+                    console.log(`✅ Created avatar for ${guest.full_name} at table ${table.number}`);
+                } else {
+                    console.log(`❌ Failed to create avatar for ${guest.full_name} at table ${table.number}`);
+                }
             }
         });
     }
 
     calculateCircularAvatarPosition(center, index, total) {
-        const radius = window.innerWidth <= 768 ? 35 : 45; // Responsive radius
+        // Responsive radius based on current scale and zoom - smaller for less spacing
+        const baseRadius = 65; // Reduced from 85 to 65 for closer positioning
+        const scaledRadius = baseRadius * this.mobileScale;
+        const currentZoom = this.map ? this.map.getZoom() : 0;
+        const zoomFactor = Math.max(0.6, Math.min(2.0, currentZoom + 1.2)); // More generous zoom scaling
+        const radius = scaledRadius * zoomFactor;
+        
         const angle = (360 / total) * index - 90; // Start from top
         const radian = (angle * Math.PI) / 180;
         
-        return [
+        console.log(`🔄 Calculating circular position for guest ${index}/${total}, center:`, center, 'radius:', radius, 'angle:', angle);
+        
+        const result = [
             center[0] + Math.sin(radian) * radius,
             center[1] + Math.cos(radian) * radius
         ];
+        
+        console.log(`📍 Guest ${index} positioned at:`, result);
+        return result;
     }
 
     calculateRectangularAvatarPosition(center, size, index, total) {
-        const margin = 25; // Distance from table edge
+        // Responsive margin based on scale - smaller for closer positioning
+        const baseMargin = 40; // Reduced from 50 to 40 for closer positioning
+        const margin = baseMargin * this.mobileScale;
         const [width, height] = size;
         
         let x, y;
+        
+        console.log(`📐 Calculating rectangular position for guest ${index}/${total}, center:`, center, 'size:', size, 'margin:', margin);
         
         if (width > height) {
             // Horizontal table (wider than tall) - guests at top and bottom edges
@@ -422,13 +484,13 @@ class WeddingTableMap {
             const offsetFromCenter = -width/2 + spacing * (index + 1);
             
             if (index % 2 === 0) {
-                // Even indices - top edge
-                x = center[0] - margin;
-                y = center[1] + offsetFromCenter;
+                // Even indices - top edge (above center)
+                x = center[0] - margin; // Move up (negative Y direction in Leaflet)
+                y = center[1] + offsetFromCenter; // Along width
             } else {
-                // Odd indices - bottom edge  
-                x = center[0] + margin;
-                y = center[1] + offsetFromCenter;
+                // Odd indices - bottom edge (below center)
+                x = center[0] + margin; // Move down (positive Y direction in Leaflet)
+                y = center[1] + offsetFromCenter; // Along width
             }
         } else {
             // Vertical table (taller than wide) - guests only at left edge
@@ -436,16 +498,31 @@ class WeddingTableMap {
             const offsetFromCenter = -height/2 + spacing * (index + 1);
             
             // All guests on left edge
-            x = center[0] + offsetFromCenter;
-            y = center[1] - margin;
+            x = center[0] + offsetFromCenter; // Along height
+            y = center[1] - margin; // Move left (negative X direction in Leaflet)
         }
         
+        console.log(`📍 Guest ${index} positioned at:`, [x, y]);
         return [x, y];
     }
 
     createGuestAvatar(guest, coords, isCurrent, tableNumber, seatNumber) {
         const isMobile = window.innerWidth <= 768;
-        const avatarSize = isMobile ? (isCurrent ? 20 : 16) : (isCurrent ? 24 : 20);
+        const currentZoom = this.map ? this.map.getZoom() : 0;
+        
+        console.log(`👤 Creating avatar for ${guest.full_name}, zoom: ${currentZoom}, minZoom: ${this.minGuestZoom}`);
+        
+        // Only hide guests at extremely low zoom levels to prevent total clutter
+        if (currentZoom < this.minGuestZoom - 1) {
+            console.log(`❌ Skipping avatar creation - zoom too low (${currentZoom} < ${this.minGuestZoom - 1})`);
+            return null;
+        }
+        
+        // Responsive avatar size based on device and zoom - smaller for less clutter
+        const baseSize = isCurrent ? 28 : 24; // Reduced from 36:32 to 28:24
+        const scaledSize = Math.max(16, baseSize * this.mobileScale); // Reduced minimum from 20 to 16
+        const zoomFactor = Math.max(0.8, Math.min(2.5, currentZoom + 1.5)); // More generous zoom scaling
+        const avatarSize = Math.round(scaledSize * zoomFactor);
         
         const avatarMarker = L.marker(coords, {
             icon: L.divIcon({
@@ -459,11 +536,13 @@ class WeddingTableMap {
                     font-size: ${avatarSize * 0.4}px; color: #f5f0e8; font-weight: bold;
                     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
                     cursor: pointer; user-select: none;
+                    transition: opacity 0.3s ease;
                 ">${guest.user ? guest.user.first_name.charAt(0).toUpperCase() : guest.full_name.charAt(0).toUpperCase()}</div>`,
                 iconSize: [avatarSize, avatarSize],
                 iconAnchor: [avatarSize/2, avatarSize/2]
             }),
-            interactive: true
+            interactive: true,
+            zIndexOffset: isCurrent ? 1000 : 100
         }).addTo(this.map);
 
         // Mobile-friendly interaction
@@ -484,11 +563,13 @@ class WeddingTableMap {
             });
         }
 
-        // Store guest marker
+        // Store guest marker for zoom management
         if (!this.guestMarkers[tableNumber]) {
             this.guestMarkers[tableNumber] = [];
         }
         this.guestMarkers[tableNumber].push(avatarMarker);
+        
+        return avatarMarker;
     }
 
     createTablePopup(table) {
@@ -525,6 +606,64 @@ class WeddingTableMap {
         `;
     }
 
+    handleZoomChange() {
+        const currentZoom = this.map.getZoom();
+        const shouldShowGuests = currentZoom >= (this.minGuestZoom - 1); // More liberal showing of guests
+        
+        console.log(`🔍 Zoom changed to ${currentZoom}, guests visible: ${shouldShowGuests}, minGuestZoom: ${this.minGuestZoom}`);
+        
+        // Show/hide guest avatars based on zoom level
+        Object.values(this.guestMarkers).forEach(tableGuests => {
+            if (Array.isArray(tableGuests)) {
+                tableGuests.forEach(guestMarker => {
+                    if (guestMarker && guestMarker.getElement) {
+                        const element = guestMarker.getElement();
+                        if (element) {
+                            element.style.opacity = shouldShowGuests ? '1' : '0';
+                            element.style.pointerEvents = shouldShowGuests ? 'all' : 'none';
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Update guest avatars size for current zoom if they are visible
+        if (shouldShowGuests) {
+            this.updateGuestAvatarSizes(currentZoom);
+        }
+    }
+
+    updateGuestAvatarSizes(currentZoom) {
+        const zoomFactor = Math.max(0.8, Math.min(1.5, currentZoom + 1.2));
+        
+        Object.entries(this.guestMarkers).forEach(([tableNumber, tableGuests]) => {
+            if (Array.isArray(tableGuests)) {
+                tableGuests.forEach((guestMarker, index) => {
+                    if (guestMarker && guestMarker.getElement) {
+                        const element = guestMarker.getElement();
+                        const avatarDiv = element?.querySelector('.guest-avatar');
+                        if (avatarDiv) {
+                            const isCurrent = avatarDiv.classList.contains('current-guest');
+                            const baseSize = isCurrent ? 32 : 28; // Increased base sizes
+                            const scaledSize = Math.max(18, baseSize * this.mobileScale); // Increased minimum
+                            const newSize = Math.round(scaledSize * zoomFactor);
+                            
+                            avatarDiv.style.width = `${newSize}px`;
+                            avatarDiv.style.height = `${newSize}px`;
+                            avatarDiv.style.fontSize = `${newSize * 0.4}px`;
+                            
+                            // Update marker icon size
+                            const icon = guestMarker.getIcon();
+                            icon.options.iconSize = [newSize, newSize];
+                            icon.options.iconAnchor = [newSize/2, newSize/2];
+                            guestMarker.setIcon(icon);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
     // Additional helper methods...
     setupSearch() {
         // Simplified search for now
@@ -552,13 +691,29 @@ class WeddingTableMap {
 
     handleResize() {
         const wasMobile = this.isMobile;
-        this.isMobile = window.innerWidth <= 768;
+        const wasSmallMobile = this.isSmallMobile;
         
-        // Recreate map if switching between mobile/desktop
-        if (wasMobile !== this.isMobile) {
-            console.log('📱 Device type changed, recreating map...');
+        this.isMobile = window.innerWidth <= 768;
+        this.isSmallMobile = window.innerWidth <= 480;
+        
+        // Update mobile scale
+        const newScale = this.isMobile ? (this.isSmallMobile ? 0.6 : 0.75) : 1.0;
+        const scaleChanged = Math.abs(newScale - this.mobileScale) > 0.05;
+        
+        // Recreate map if significant changes occurred
+        if (wasMobile !== this.isMobile || wasSmallMobile !== this.isSmallMobile || scaleChanged) {
+            console.log('📱 Device layout changed significantly, recreating map...', {
+                wasMobile, 'isMobile': this.isMobile,
+                wasSmallMobile, 'isSmallMobile': this.isSmallMobile,
+                'oldScale': this.mobileScale, 'newScale': newScale
+            });
+            
+            this.mobileScale = newScale;
             this.createMap();
             this.addTables();
+        } else {
+            // Just invalidate size for minor changes
+            this.map.invalidateSize();
         }
     }
 

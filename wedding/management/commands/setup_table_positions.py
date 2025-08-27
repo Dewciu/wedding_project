@@ -91,12 +91,12 @@ class Command(BaseCommand):
         return [
             # Top rectangular table
             {
-                'number': 3,
+                'number': 2,
                 'name': 'Stolik “Nie Dotykać Tortu”',
                 'map_x': 425, 'map_y': 125,
                 'map_width': 350, 'map_height': 70,
                 'shape': 'rectangular',
-                'capacity': 12,
+                'capacity': 50,
                 'description': 'Rodzina ze strony Pana Młodego',
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
@@ -109,7 +109,7 @@ class Command(BaseCommand):
                 'map_x': 125, 'map_y': 300,
                 'map_width': 60, 'map_height': 200,
                 'shape': 'rectangular',
-                'capacity': 10,
+                'capacity': 5,
                 'description': 'Goście specjalni',
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
@@ -117,12 +117,12 @@ class Command(BaseCommand):
 
             # Bottom rectangular table
             {
-                'number': 2,
+                'number': 3,
                 'name': 'Stolik “Ostatnia Kolejka”',
                 'map_x': 450, 'map_y': 475,
                 'map_width': 400, 'map_height': 60,
                 'shape': 'rectangular',
-                'capacity': 10,
+                'capacity': 32,
                 'description': 'Para Młoda i najbliżsi',
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
@@ -177,7 +177,7 @@ class Command(BaseCommand):
                 'map_x': 325, 'map_y': 340,
                 'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
-                'capacity': 8,
+                'capacity': 10,
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
             },
@@ -187,7 +187,7 @@ class Command(BaseCommand):
                 'map_x': 475, 'map_y': 340,
                 'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
-                'capacity': 8,
+                'capacity': 10,
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
             },
@@ -197,7 +197,7 @@ class Command(BaseCommand):
                 'map_x': 625, 'map_y': 340,
                 'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
-                'capacity': 8,
+                'capacity': 10,
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
             }
