@@ -52,22 +52,41 @@
     display: none; /* Hide default Leaflet controls for cleaner look */
 }
 
+/* Enhanced popup styles for better mobile experience */
 .leaflet-popup-content-wrapper {
     background: linear-gradient(135deg, #f8f5f0, #ede8dd);
     border: 2px solid #d4c4a8;
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(93, 78, 55, 0.3);
+    max-height: 60vh; /* Prevent popups from being too tall */
+    overflow-y: auto;
 }
 
 .leaflet-popup-content {
     margin: 15px;
     color: #5d4e37;
     font-family: Georgia, serif;
+    line-height: 1.4;
 }
 
 .leaflet-popup-tip {
     background: #f8f5f0;
     border: 1px solid #d4c4a8;
+}
+
+.leaflet-popup-close-button {
+    top: 8px !important;
+    right: 8px !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 16px !important;
+    background: rgba(139, 111, 71, 0.1) !important;
+    border-radius: 50% !important;
+    color: #8b6f47 !important;
+}
+
+.leaflet-popup-close-button:hover {
+    background: rgba(139, 111, 71, 0.2) !important;
 }
 
 /* Custom Table Markers */

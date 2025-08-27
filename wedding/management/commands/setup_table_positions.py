@@ -87,101 +87,119 @@ class Command(BaseCommand):
         self.stdout.write('3. Adjust colors and shapes as needed')
 
     def get_default_positions(self):
-        """Original layout matching the CSS version"""
+        """Chessboard pattern layout with rectangular perimeter tables"""
         return [
-            # Rectangular tables
-            {
-                'number': 1,
-                'name': 'Stół Rodziny Panny Młodej',
-                'map_x': 170, 'map_y': 200,
-                'map_width': 65, 'map_height': 200,
-                'shape': 'rectangular',
-                'capacity': 10,
-                'description': 'Rodzina ze strony Panny Młodej',
-                'color': '#e8ddd4',
-                'border_color': '#d4c4a8'
-            },
-            {
-                'number': 2,
-                'name': 'Stół Honorowy',
-                'map_x': 250, 'map_y': 520,
-                'map_width': 500, 'map_height': 65,
-                'shape': 'rectangular',
-                'capacity': 10,
-                'description': 'Para Młoda i najbliżsi',
-                'color': '#f5f0e8',
-                'border_color': '#8b6f47'
-            },
+            # Top rectangular table
             {
                 'number': 3,
-                'name': 'Stół Rodziny Pana Młodego',
-                'map_x': 650, 'map_y': 80,
-                'map_width': 600, 'map_height': 65,
+                'name': 'Stolik “Nie Dotykać Tortu”',
+                'map_x': 425, 'map_y': 125,
+                'map_width': 350, 'map_height': 70,
                 'shape': 'rectangular',
                 'capacity': 12,
                 'description': 'Rodzina ze strony Pana Młodego',
-                'color': '#e8ddd4',
-                'border_color': '#d4c4a8'
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
+            },
+            
+            # Left rectangular table
+            {
+                'number': 1,
+                'name': 'Stół Pary Młodej',
+                'map_x': 125, 'map_y': 300,
+                'map_width': 60, 'map_height': 200,
+                'shape': 'rectangular',
+                'capacity': 10,
+                'description': 'Goście specjalni',
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
             },
 
-            # Circular tables in chessboard pattern
+            # Bottom rectangular table
+            {
+                'number': 2,
+                'name': 'Stolik “Ostatnia Kolejka”',
+                'map_x': 450, 'map_y': 475,
+                'map_width': 400, 'map_height': 60,
+                'shape': 'rectangular',
+                'capacity': 10,
+                'description': 'Para Młoda i najbliżsi',
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
+            },
+
+            # Chessboard pattern - Row 1
             {
                 'number': 4,
-                'name': 'Przyjaciele ze Studiów',
-                'map_x': 320, 'map_y': 180,
-                'map_width': 85, 'map_height': 85,
+                'name': 'Stolik “Zaraz Wracam”',
+                'map_x': 250, 'map_y': 260,
+                'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
                 'capacity': 8,
-            },
-            {
-                'number': 5,
-                'name': 'Znajomi z Pracy',
-                'map_x': 430, 'map_y': 330,
-                'map_width': 85, 'map_height': 85,
-                'shape': 'circular',
-                'capacity': 8,
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
             },
             {
                 'number': 6,
-                'name': 'Przyjaciele z Dzieciństwa',
-                'map_x': 320, 'map_y': 360,
-                'map_width': 85, 'map_height': 85,
+                'name': 'Stolik “Pół Na Pół”',
+                'map_x': 400, 'map_y': 260,
+                'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
                 'capacity': 8,
-            },
-            {
-                'number': 7,
-                'name': 'Sąsiedzi i Znajomi',
-                'map_x': 430, 'map_y': 510,
-                'map_width': 85, 'map_height': 85,
-                'shape': 'circular',
-                'capacity': 8,
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
             },
             {
                 'number': 8,
-                'name': 'Drużbowie i Druhny',
-                'map_x': 320, 'map_y': 540,
-                'map_width': 85, 'map_height': 85,
+                'name': 'Stolik “Obróć Panną”',
+                'map_x': 550, 'map_y': 260,
+                'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
-                'capacity': 10,
+                'capacity': 8,
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
+            },
+            {
+                'number': 10,
+                'name': 'Stolik “BMW - Będziesz Miał Wesele”',
+                'map_x': 700, 'map_y': 260,
+                'map_width': 80, 'map_height': 80,
+                'shape': 'circular',
+                'capacity': 8,
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
+            },
+
+            # Chessboard pattern - Row 2 (offset)
+            {
+                'number': 5,
+                'name': 'Stolik “Nie Mów Mamie”',
+                'map_x': 325, 'map_y': 340,
+                'map_width': 80, 'map_height': 80,
+                'shape': 'circular',
+                'capacity': 8,
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
+            },
+            {
+                'number': 7,
+                'name': 'Stolik “Operacja Barszcz”',
+                'map_x': 475, 'map_y': 340,
+                'map_width': 80, 'map_height': 80,
+                'shape': 'circular',
+                'capacity': 8,
                 'color': '#d4a574',
                 'border_color': '#8b6f47'
             },
             {
                 'number': 9,
-                'name': 'Młodzież',
-                'map_x': 430, 'map_y': 690,
-                'map_width': 85, 'map_height': 85,
-                'shape': 'circular',
-                'capacity': 10,
-            },
-            {
-                'number': 10,
-                'name': 'Starsze Pokolenie',
-                'map_x': 320, 'map_y': 720,
-                'map_width': 85, 'map_height': 85,
+                'name': 'Stolik “Wszystko pod Kontrolą”',
+                'map_x': 625, 'map_y': 340,
+                'map_width': 80, 'map_height': 80,
                 'shape': 'circular',
                 'capacity': 8,
+                'color': '#d4a574',
+                'border_color': '#8b6f47'
             }
         ]
 
@@ -200,8 +218,8 @@ class Command(BaseCommand):
             {'number': 7, 'map_x': 700, 'map_y': 550, 'map_width': 90, 'map_height': 90, 'shape': 'circular', 'capacity': 8},
             
             # Center tables around dance floor
-            {'number': 8, 'map_x': 350, 'map_y': 300, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
-            {'number': 9, 'map_x': 550, 'map_y': 300, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
+            {'number': 8, 'map_x': 350, 'map_y': 340, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
+            {'number': 9, 'map_x': 550, 'map_y': 340, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
             {'number': 10, 'map_x': 450, 'map_y': 450, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
         ]
 

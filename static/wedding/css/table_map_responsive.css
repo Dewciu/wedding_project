@@ -445,3 +445,59 @@
         box-shadow: none; /* Reduce visual complexity */
     }
 }
+
+/* Guest Info Display - appears below map when clicking on guest avatar */
+#guest-info-display {
+    animation: slideInFromTop 0.3s ease-out;
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments for guest info display */
+@media (max-width: 768px) {
+    #guest-info-display {
+        margin: 10px -10px 15px -10px;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    #guest-info-display h5 {
+        font-size: 1rem !important;
+    }
+    
+    #guest-info-display > div:last-child {
+        grid-template-columns: auto 1fr;
+        gap: 8px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #guest-info-display {
+        margin: 10px -15px 15px -15px;
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+    
+    #guest-info-display > div:last-child {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    
+    #guest-info-display > div:last-child > strong {
+        margin-top: 8px;
+    }
+    
+    #guest-info-display > div:last-child > strong:first-child {
+        margin-top: 0;
+    }
+}
