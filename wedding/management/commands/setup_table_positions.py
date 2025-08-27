@@ -217,7 +217,7 @@ class Command(BaseCommand):
             {'number': 6, 'map_x': 200, 'map_y': 550, 'map_width': 90, 'map_height': 90, 'shape': 'circular', 'capacity': 8},
             {'number': 7, 'map_x': 700, 'map_y': 550, 'map_width': 90, 'map_height': 90, 'shape': 'circular', 'capacity': 8},
             
-            # Center tables around dance floor
+            # Center tables
             {'number': 8, 'map_x': 350, 'map_y': 340, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
             {'number': 9, 'map_x': 550, 'map_y': 340, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},
             {'number': 10, 'map_x': 450, 'map_y': 450, 'map_width': 80, 'map_height': 80, 'shape': 'circular', 'capacity': 6},

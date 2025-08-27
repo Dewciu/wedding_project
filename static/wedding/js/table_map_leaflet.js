@@ -414,28 +414,29 @@ class WeddingTableMap {
         const margin = 25; // Distance from table edge
         const [width, height] = size;
         
-        // Distribute along perimeter
-        const perimeter = 2 * (width + height);
-        const spacing = perimeter / total;
-        const position = spacing * index;
-        
         let x, y;
         
-        if (position < width) {
-            // Top edge
-            x = center[0] - margin;
-            y = center[1] - width/2 + position;
-        } else if (position < width + height) {
-            // Right edge
-            x = center[0] - height/2 + (position - width);
-            y = center[1] + margin;
-        } else if (position < 2 * width + height) {
-            // Bottom edge
-            x = center[0] + margin;
-            y = center[1] + width/2 - (position - width - height);
+        if (width > height) {
+            // Horizontal table (wider than tall) - guests at top and bottom edges
+            const spacing = width / (total + 1); // Evenly distribute with padding
+            const offsetFromCenter = -width/2 + spacing * (index + 1);
+            
+            if (index % 2 === 0) {
+                // Even indices - top edge
+                x = center[0] - margin;
+                y = center[1] + offsetFromCenter;
+            } else {
+                // Odd indices - bottom edge  
+                x = center[0] + margin;
+                y = center[1] + offsetFromCenter;
+            }
         } else {
-            // Left edge
-            x = center[0] + height/2 - (position - 2 * width - height);
+            // Vertical table (taller than wide) - guests only at left edge
+            const spacing = height / (total + 1); // Evenly distribute with padding
+            const offsetFromCenter = -height/2 + spacing * (index + 1);
+            
+            // All guests on left edge
+            x = center[0] + offsetFromCenter;
             y = center[1] - margin;
         }
         

@@ -43,15 +43,51 @@ function positionGuestAvatars(tableCircle) {
     
     if (totalAvatars === 0) return;
     
-    const radius = 60; // Distance from table center
-    const angleStep = (360 / totalAvatars);
+    // Get table shape info
+    const tableShape = tableCircle.dataset.shape || 'circular';
+    const tableWidth = parseFloat(tableCircle.dataset.width) || 85;
+    const tableHeight = parseFloat(tableCircle.dataset.height) || 85;
     
     avatars.forEach((avatar, index) => {
-        const angle = angleStep * index - 90; // Start from top
-        const radian = (angle * Math.PI) / 180;
+        let x, y;
         
-        const x = Math.cos(radian) * radius;
-        const y = Math.sin(radian) * radius;
+        if (tableShape === 'rectangular' || tableShape === 'square') {
+            // Rectangular table positioning logic
+            const margin = 35; // Distance from table edge
+            
+            if (tableWidth > tableHeight) {
+                // Horizontal table - guests at top and bottom
+                const spacing = tableWidth / (totalAvatars + 1);
+                const offsetFromCenter = -tableWidth/2 + spacing * (index + 1);
+                
+                if (index % 2 === 0) {
+                    // Even indices - top edge
+                    x = offsetFromCenter;
+                    y = -margin;
+                } else {
+                    // Odd indices - bottom edge
+                    x = offsetFromCenter;
+                    y = margin;
+                }
+            } else {
+                // Vertical table - guests only at left edge
+                const spacing = tableHeight / (totalAvatars + 1);
+                const offsetFromCenter = -tableHeight/2 + spacing * (index + 1);
+                
+                // All guests on left edge
+                x = -margin;
+                y = offsetFromCenter;
+            }
+        } else {
+            // Circular table positioning (original logic)
+            const radius = 60; // Distance from table center
+            const angleStep = (360 / totalAvatars);
+            const angle = angleStep * index - 90; // Start from top
+            const radian = (angle * Math.PI) / 180;
+            
+            x = Math.cos(radian) * radius;
+            y = Math.sin(radian) * radius;
+        }
         
         // Apply position with smooth animation
         avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
