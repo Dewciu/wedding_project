@@ -532,7 +532,7 @@ class WeddingTableMap {
         const avatarMarker = L.marker(coords, {
             icon: L.divIcon({
                 className: 'guest-avatar-marker',
-                html: `<div class="guest-avatar ${isCurrent ? 'current-guest' : ''}" style="
+                html: `<div class="guest-avatar ${isCurrent ? 'current-guest' : ''}" data-guest-id="${guest.id}" style="
                     width: ${avatarSize}px; height: ${avatarSize}px;
                     border-radius: 50%;
                     background: linear-gradient(145deg, ${isCurrent ? '#d4a574, #b8935f' : '#8b6f47, #5d4e37'});
@@ -671,8 +671,190 @@ class WeddingTableMap {
 
     // Additional helper methods...
     setupSearch() {
-        // Simplified search for now
-        console.log('🔍 Search setup complete');
+        console.log('🔍 Setting up search functionality...');
+        
+        const searchForm = document.getElementById('table-search-form');
+        const searchInput = searchForm?.querySelector('input[name="search_query"]');
+        
+        if (!searchForm || !searchInput) {
+            console.log('⚠️ Search form or input not found');
+            return;
+        }
+        
+        let searchTimeout;
+        
+        // Real-time search as user types
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            // Clear previous timeout
+            clearTimeout(searchTimeout);
+            
+            // Clear highlights if query is too short
+            if (query.length < 2) {
+                this.clearSearchHighlights();
+                return;
+            }
+            
+            // Debounced search
+            searchTimeout = setTimeout(() => {
+                this.performSearch(query);
+            }, 300);
+        });
+        
+        // Handle form submission
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (query.length >= 2) {
+                this.performSearch(query);
+            }
+        });
+        
+        console.log('✅ Search functionality setup complete');
+    }
+
+    performSearch(query) {
+        console.log(`🔍 Searching for: "${query}"`);
+        
+        // AJAX search
+        fetch(`/ajax/table-search/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.found) {
+                    this.handleSearchSuccess(data);
+                } else {
+                    this.handleSearchNoResults(query);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Search error:', error);
+                this.showNotification('Wystąpił błąd podczas wyszukiwania', 'error');
+            });
+    }
+
+    handleSearchSuccess(data) {
+        console.log(`✅ Guest found:`, data);
+        
+        // Clear previous highlights
+        this.clearSearchHighlights();
+        
+        if (!data.table_number || data.table_number === 'Nie przypisano') {
+            this.showNotification(`Znaleziono: ${data.guest_name} - Brak przypisanego stołu`, 'warning');
+            return;
+        }
+        
+        // Find table marker
+        const tableData = this.tableMarkers[data.table_number];
+        if (!tableData) {
+            this.showNotification(`Znaleziono: ${data.guest_name} - Stół ${data.table_number} (nie znaleziono na mapie)`, 'warning');
+            return;
+        }
+        
+        // Highlight table on map
+        this.highlightTable(data.table_number);
+        
+        // Zoom and pan to table with smooth animation
+        this.map.setView(tableData.coords, 1, { 
+            animate: true,
+            duration: 1.0
+        });
+        
+        // Highlight specific guest avatar after zoom
+        setTimeout(() => {
+            this.highlightGuestAvatar(data.guest_id, data.table_number);
+        }, 600);
+        
+        // Highlight table card after a delay
+        setTimeout(() => {
+            this.highlightTableCard(data.table_number);
+        }, 500);
+        
+        // Show success notification
+        const tableName = data.table_name ? ` (${data.table_name})` : '';
+        this.showNotification(`Znaleziono: ${data.guest_name} - Stół ${data.table_number}${tableName}`, 'success');
+    }
+
+    handleSearchNoResults(query) {
+        console.log(`❌ No results for: "${query}"`);
+        this.clearSearchHighlights();
+        this.showNotification(`Nie znaleziono gościa: "${query}"`, 'info');
+    }
+
+    highlightGuestAvatar(guestId, tableNumber) {
+        console.log(`👤 Highlighting guest avatar: ID ${guestId} at table ${tableNumber}`);
+        
+        // Clear any existing guest highlights
+        this.clearGuestHighlights();
+        
+        // Find the guest markers for this table
+        const tableGuests = this.guestMarkers[tableNumber];
+        if (!tableGuests || !Array.isArray(tableGuests)) {
+            console.log(`❌ No guest markers found for table ${tableNumber}`);
+            return;
+        }
+        
+        // Find the specific guest avatar
+        let targetAvatar = null;
+        tableGuests.forEach(guestMarker => {
+            if (guestMarker && guestMarker.getElement) {
+                const element = guestMarker.getElement();
+                const avatarDiv = element?.querySelector('.guest-avatar');
+                if (avatarDiv) {
+                    // Check if this avatar matches our target guest
+                    // The guest ID should be stored in a data attribute
+                    const avatarGuestId = avatarDiv.dataset.guestId;
+                    if (avatarGuestId && parseInt(avatarGuestId) === parseInt(guestId)) {
+                        targetAvatar = avatarDiv;
+                        console.log(`✅ Found target guest avatar for ID ${guestId}`);
+                        return;
+                    }
+                }
+            }
+        });
+        
+        if (targetAvatar) {
+            // Add visual highlight to the avatar
+            targetAvatar.classList.add('search-highlighted');
+            targetAvatar.style.animation = 'search-pulse 2s infinite';
+            targetAvatar.style.transform = 'scale(1.3)';
+            targetAvatar.style.zIndex = '9999';
+            targetAvatar.style.boxShadow = '0 0 20px rgba(212, 165, 116, 0.8), 0 0 40px rgba(212, 165, 116, 0.4)';
+            
+            console.log(`✨ Guest avatar highlighted for ID ${guestId}`);
+            
+            // Remove highlight after a few seconds
+            setTimeout(() => {
+                if (targetAvatar && targetAvatar.parentNode) {
+                    targetAvatar.style.animation = '';
+                    targetAvatar.style.transform = '';
+                    targetAvatar.style.zIndex = '';
+                    targetAvatar.style.boxShadow = '';
+                    targetAvatar.classList.remove('search-highlighted');
+                }
+            }, 4000);
+        } else {
+            console.log(`❌ Could not find guest avatar for ID ${guestId} at table ${tableNumber}`);
+        }
+    }
+    
+    clearGuestHighlights() {
+        // Clear all guest avatar highlights
+        document.querySelectorAll('.guest-avatar.search-highlighted').forEach(avatar => {
+            avatar.classList.remove('search-highlighted');
+            avatar.style.animation = '';
+            avatar.style.transform = '';
+            avatar.style.zIndex = '';
+            avatar.style.boxShadow = '';
+        });
+    }
+
+    clearSearchHighlights() {
+        // Clear table highlights
+        this.clearHighlights();
+        this.clearCardHighlights();
+        // Clear guest highlights
+        this.clearGuestHighlights();
     }
 
     setupEventListeners() {

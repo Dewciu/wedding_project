@@ -556,3 +556,25 @@
     background: linear-gradient(135deg, #f0e8dd, #e8ddd0) !important;
     border-bottom: 1px solid #d4c4a8;
 }
+
+/* Animation for highlighting found guest avatars in search results */
+@keyframes search-pulse {
+    0% {
+        box-shadow: 0 0 20px rgba(212, 165, 116, 0.8), 0 0 40px rgba(212, 165, 116, 0.4);
+        border-color: #d4a574;
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(212, 165, 116, 1), 0 0 60px rgba(212, 165, 116, 0.6);
+        border-color: #f4c994;
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(212, 165, 116, 0.8), 0 0 40px rgba(212, 165, 116, 0.4);
+        border-color: #d4a574;
+    }
+}
+
+/* Guest Avatar Search Highlight */
+.guest-avatar.search-highlighted {
+    position: relative;
+    z-index: 9999 !important;
+}
