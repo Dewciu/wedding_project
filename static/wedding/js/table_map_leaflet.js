@@ -457,7 +457,7 @@ class WeddingTableMap {
         const angle = (360 / total) * index - 90; // Start from top
         const radian = (angle * Math.PI) / 180;
         
-        console.log(`🔄 Calculating circular position for guest ${index}/${total}, center:`, center, 'radius:', radius, 'angle:', angle);
+        console.log(`🔄 Calculating circular position for guest ${index}/${total}, center:`, center, 'radius:', radius, 'angle:', angle, 'scaled: radius:', scaledRadius);
         
         const result = [
             center[0] + Math.sin(radian) * radius,
@@ -519,8 +519,8 @@ class WeddingTableMap {
         }
         
         // Responsive avatar size based on device and zoom - smaller for less clutter
-        const baseSize = isCurrent ? 28 : 24; // Reduced from 36:32 to 28:24
-        const scaledSize = Math.max(16, baseSize * this.mobileScale); // Reduced minimum from 20 to 16
+        const baseSize = isCurrent ? 30 : 28; // Reduced from 36:32 to 28:24
+        const scaledSize = Math.max(26, baseSize * this.mobileScale); // Reduced minimum from 20 to 16
         const zoomFactor = Math.max(0.8, Math.min(2.5, currentZoom + 1.5)); // More generous zoom scaling
         const avatarSize = Math.round(scaledSize * zoomFactor);
         
