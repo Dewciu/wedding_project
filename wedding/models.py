@@ -39,16 +39,32 @@ class Guest(models.Model):
         return f"{self.user.first_name} {self.user.last_name}"
 
 class Table(models.Model):
+    SHAPE_CHOICES = [
+        ('circular', 'Okrągły'),
+        ('rectangular', 'Prostokątny'),
+        ('square', 'Kwadratowy'),
+    ]
+    
     number = models.IntegerField(unique=True, verbose_name="Numer stołu")
     name = models.CharField(max_length=100, blank=True, verbose_name="Nazwa stołu")
     capacity = models.IntegerField(default=8, verbose_name="Miejsca")
     description = models.TextField(blank=True, verbose_name="Opis")
     
+    # Pozycja i wymiary stołu na mapie (współrzędne Leaflet)
+    map_x = models.FloatField(default=300, verbose_name="Pozycja X", help_text="Współrzędna X na mapie (0-900)")
+    map_y = models.FloatField(default=300, verbose_name="Pozycja Y", help_text="Współrzędna Y na mapie (0-600)")
+    map_width = models.FloatField(default=85, verbose_name="Szerokość", help_text="Szerokość stołu na mapie")
+    map_height = models.FloatField(default=85, verbose_name="Wysokość", help_text="Wysokość stołu na mapie")
+    shape = models.CharField(max_length=20, choices=SHAPE_CHOICES, default='circular', verbose_name="Kształt stołu")
+    
+    # Opcje wizualne
+    color = models.CharField(max_length=7, default='#d4c4a8', verbose_name="Kolor", help_text="Kolor w formacie hex np. #d4c4a8")
+    border_color = models.CharField(max_length=7, default='#b8a082', verbose_name="Kolor obramowania", help_text="Kolor obramowania hex")
+    
     class Meta:
         verbose_name = "Stół"
         verbose_name_plural = "Stoły"
         ordering = ['number']
-    
     def __str__(self):
         return f"Stół {self.number}" + (f" - {self.name}" if self.name else "")
     
@@ -65,7 +81,6 @@ class Table(models.Model):
         if self.capacity > 0:
             return int((self.guests_count / self.capacity) * 100)
         return 0
-
 class Photo(models.Model):
     CATEGORY_CHOICES = [
         ('ceremony', 'Ceremonia'),

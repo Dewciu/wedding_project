@@ -20,8 +20,29 @@ class GuestAdmin(admin.ModelAdmin):
 
 @admin.register(Table)
 class TableAdmin(admin.ModelAdmin):
-    list_display = ['number', 'name', 'capacity', 'guests_count', 'available_seats']
+    list_display = ['number', 'name', 'capacity', 'guests_count', 'available_seats', 'shape', 'position_display']
+    list_filter = ['shape', 'capacity']
+    list_editable = ['name', 'capacity', 'shape']
     ordering = ['number']
+    
+    fieldsets = (
+        ('Podstawowe Informacje', {
+            'fields': ('number', 'name', 'capacity', 'description')
+        }),
+        ('Pozycja na Mapie', {
+            'fields': (
+                ('map_x', 'map_y'),
+                ('map_width', 'map_height'),
+                'shape'
+            ),
+            'description': 'Współrzędne: X (0-900), Y (0-600). Wymiary w pikselach na mapie.'
+        }),
+        ('Wygląd', {
+            'fields': (('color', 'border_color'),),
+            'classes': ('collapse',),
+            'description': 'Kolory w formacie hex (np. #d4c4a8)'
+        })
+    )
     
     def guests_count(self, obj):
         return obj.guests_count
@@ -30,6 +51,16 @@ class TableAdmin(admin.ModelAdmin):
     def available_seats(self, obj):
         return obj.available_seats
     available_seats.short_description = 'Wolne miejsca'
+    
+    def position_display(self, obj):
+        return f"({obj.map_x}, {obj.map_y})"
+    position_display.short_description = 'Pozycja (X, Y)'
+    
+    class Media:
+        css = {
+            'all': ('wedding/css/admin_table_positioning.css',)
+        }
+        js = ('wedding/js/admin_table_positioning.js',)
 
 @admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):

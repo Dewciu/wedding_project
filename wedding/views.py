@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 from .models import WeddingInfo, Photo, Guest, Table, ScheduleEvent, MenuItem
 from .forms import PhotoUploadForm, GuestRegistrationForm, TableSearchForm
 
@@ -62,6 +64,8 @@ def gallery(request):
     return render(request, 'wedding/gallery.html', context)
 
 def table_finder(request):
+    print("=== DEBUG TABLE FINDER START ===")
+    
     form = TableSearchForm()
     guest_info = None
     table_info = None
@@ -92,12 +96,74 @@ def table_finder(request):
     
     # Get all tables with their guests for the seating plan
     tables = Table.objects.all().order_by('number')
+    print(f"Found {tables.count()} tables in database")
     
-    # Add guest count and guest list to each table
+    # Prepare tables data for JavaScript
+    tables_data = []
     for table in tables:
-        table.guest_list = Guest.objects.filter(
+        guest_list = Guest.objects.filter(
             table_number=table.number
         ).select_related('user').order_by('user__first_name')
+        
+        table.guest_list = guest_list  # For template rendering
+        
+        print(f"Processing table {table.number}: {guest_list.count()} guests")
+        
+        # Prepare JSON-serializable data for JavaScript
+        guests_json = []
+        for guest in guest_list:
+            guests_json.append({
+                'id': guest.id,
+                'full_name': guest.full_name,
+                'guest_type': guest.guest_type or 'Gość',
+                'user': {
+                    'first_name': guest.user.first_name,
+                    'last_name': guest.user.last_name
+                }
+            })
+        
+        # Create table data with positioning info
+        table_dict = {
+            'number': table.number,
+            'name': table.name,
+            'description': table.description,
+            'capacity': table.capacity,
+            'guests_count': guest_list.count(),
+            'guest_list': guests_json,
+            # Positioning data from database (with fallbacks)
+            'map_x': float(table.map_x) if hasattr(table, 'map_x') and table.map_x else 300.0,
+            'map_y': float(table.map_y) if hasattr(table, 'map_y') and table.map_y else 300.0,
+            'map_width': float(table.map_width) if hasattr(table, 'map_width') and table.map_width else 85.0,
+            'map_height': float(table.map_height) if hasattr(table, 'map_height') and table.map_height else 85.0,
+            'shape': getattr(table, 'shape', 'circular'),
+            'color': getattr(table, 'color', '#d4c4a8'),
+            'border_color': getattr(table, 'border_color', '#b8a082'),
+        }
+        
+        tables_data.append(table_dict)
+        print(f"Table {table.number} data: x={table_dict['map_x']}, y={table_dict['map_y']}, shape={table_dict['shape']}")
+    
+    # Prepare current guest info for JavaScript
+    guest_info_json = None
+    if guest_info:
+        guest_info_json = {
+            'id': guest_info.id,
+            'full_name': guest_info.full_name,
+            'table_number': guest_info.table_number,
+            'guest_type': guest_info.guest_type or 'Gość'
+        }
+        print(f"Current guest: {guest_info_json}")
+    
+    # Convert to JSON strings
+    try:
+        tables_json_str = json.dumps(tables_data, cls=DjangoJSONEncoder)
+        guest_info_json_str = json.dumps(guest_info_json, cls=DjangoJSONEncoder)
+        print(f"Tables JSON length: {len(tables_json_str)}")
+        print(f"Guest info JSON: {guest_info_json_str}")
+    except Exception as e:
+        print(f"JSON serialization error: {e}")
+        tables_json_str = "[]"
+        guest_info_json_str = "null"
     
     context = {
         'form': form,
@@ -105,7 +171,13 @@ def table_finder(request):
         'table_info': table_info,
         'table_guests': table_guests,
         'tables': tables,
+        'tables_json': tables_json_str,
+        'guest_info_json': guest_info_json_str,
     }
+    
+    print("=== DEBUG TABLE FINDER END ===")
+    print(f"Context keys: {list(context.keys())}")
+    
     return render(request, 'wedding/table_finder.html', context)
 
 def schedule(request):
