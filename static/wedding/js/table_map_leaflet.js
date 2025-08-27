@@ -347,7 +347,12 @@ class WeddingTableMap {
         
         this.clearHighlights();
         this.highlightTable(table.number);
-        this.highlightTableCard(table.number);
+        
+        // Small delay before scrolling to allow user to see map highlight first
+        setTimeout(() => {
+            this.highlightTableCard(table.number);
+        }, 300);
+        
         this.showNotification(`Wybrano stół ${table.number}: ${table.name}`, 'info');
     }
 
@@ -733,15 +738,47 @@ class WeddingTableMap {
 
     highlightTableCard(tableNumber) {
         const card = document.querySelector(`[data-table-card="${tableNumber}"]`);
-        if (card) {
-            card.classList.add('highlighted-card');
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (!card) {
+            console.log(`⚠️ Table card ${tableNumber} not found in DOM`);
+            return;
         }
+        
+        // Clear previous highlights
+        this.clearCardHighlights();
+        
+        // Add highlight class
+        card.classList.add('highlighted-card');
+        
+        // Scroll to center with smooth animation
+        card.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+        });
+        
+        // Add temporary glow effect
+        card.style.transition = 'all 0.3s ease';
+        card.style.boxShadow = '0 8px 25px rgba(139, 111, 71, 0.4), 0 0 0 3px rgba(139, 111, 71, 0.2)';
+        card.style.transform = 'scale(1.02)';
+        
+        // Remove glow after animation
+        setTimeout(() => {
+            if (card && card.parentNode) {
+                card.style.boxShadow = '';
+                card.style.transform = '';
+            }
+        }, 2000);
+        
+        console.log(`✨ Table card ${tableNumber} highlighted and scrolled to center`);
     }
 
     clearCardHighlights() {
         document.querySelectorAll('.table-card').forEach(card => {
             card.classList.remove('highlighted-card');
+            // Reset any inline styles from temporary highlighting
+            card.style.boxShadow = '';
+            card.style.transform = '';
+            card.style.transition = '';
         });
     }
 

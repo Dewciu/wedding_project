@@ -537,3 +537,22 @@
         margin-top: 0;
     }
 }
+
+/* Enhanced table card highlighting styles */
+.table-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.table-card.highlighted-card {
+    border: 2px solid #8b6f47 !important;
+    transform: scale(1.03);
+    box-shadow: 0 12px 35px rgba(139, 111, 71, 0.25), 0 0 0 3px rgba(139, 111, 71, 0.15);
+    background: linear-gradient(135deg, #fdfcfa, #f5f0e8);
+    z-index: 10;
+    position: relative;
+}
+
+.table-card.highlighted-card .card-header {
+    background: linear-gradient(135deg, #f0e8dd, #e8ddd0) !important;
+    border-bottom: 1px solid #d4c4a8;
+}
