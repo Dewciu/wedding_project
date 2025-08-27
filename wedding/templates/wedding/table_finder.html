@@ -1,15 +1,19 @@
 {% extends 'wedding/base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
+{% load wedding_extras %}
 
 {% block title %}Znajdź Swój Stół - {{ block.super }}{% endblock %}
 
 {% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-/* Table Map Styles */
+/* Wedding Map Styles */
 .table-map-container {
     background: linear-gradient(135deg, #f8f5f0 0%, #ede8dd 100%);
     border-radius: 20px;
-    padding: 40px 30px;
+    padding: 30px 20px;
     margin: 30px 0;
     box-shadow: 0 12px 24px rgba(93, 78, 55, 0.15);
     position: relative;
@@ -25,148 +29,7 @@
     height: 200%;
     background: radial-gradient(circle, rgba(212, 196, 168, 0.1) 0%, transparent 70%);
     animation: gentle-rotate 30s linear infinite;
-}
-
-.table-map {
-    position: relative;
-    width: 100%;
-    height: 600px; /* Increased height for larger layout */
-    background: transparent;
-    margin: 20px auto;
-    max-width: 900px; /* Increased max width */
-}
-
-/* Use absolute positioning for precise table placement */
-.table-circle {
-    position: absolute;
-    width: 85px; /* Increased from 70px */
-    height: 85px;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #d4c4a8, #c8b99c);
-    border: 3px solid #b8a082;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 
-        0 6px 20px rgba(93, 78, 55, 0.2),
-        inset 0 2px 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0.8);
-    z-index: 10; /* Base z-index for tables */
-}
-
-/* Rectangular tables repositioned with increased sizes */
-.table-1 {
-    background: linear-gradient(145deg, #ffffff, #e4b048);
-    position: absolute;
-    width: 65px;  /* Increased from 55px */
-    height: 200px;  /* Increased from 180px */
-    border-radius: 12px;
-    left: 70px;   /* Adjusted for centering */
-    top: 200px;   /* Centered vertically */
-}
-
-.table-2 {
-    position: absolute;
-    width: 500px;  /* Increased from 350px */
-    height: 65px;  /* Increased from 55px */
-    border-radius: 12px;
-    left: 200px;  /* Centered horizontally */
-    top: 520px;   /* Moved down to bottom */
-}
-
-.table-3 {
-    position: absolute;
-    width: 600px;  /* Increased from 350px */
-    height: 65px;  /* Increased from 55px */
-    border-radius: 12px;
-    left: 200px;  /* Centered horizontally */
-    top: 15px;    /* Top position */
-}
-
-/* Circular tables centered around table 1 with larger chessboard spacing */
-/* Top row: tables 4, 6, 8, 10 - moved to center the chessboard */
-.table-4 {
-    left: 220px;  /* Moved right to center the pattern */
-    top: 180px;   /* Moved down slightly */
-}
-
-.table-6 {
-    left: 360px;  /* Spacing: 140px from table 4 */
-    top: 180px;   /* Same horizontal line */
-}
-
-.table-8 {
-    left: 500px;  /* Spacing: 140px from table 6 */
-    top: 180px;   /* Same horizontal line */
-}
-
-.table-10 {
-    left: 640px;  /* Spacing: 140px from table 8 */
-    top: 180px;   /* Same horizontal line */
-}
-
-/* Bottom row: tables 5, 7, 9 - offset for chessboard pattern */
-.table-5 {
-    left: 290px;  /* Offset by 70px for chessboard pattern, moved right */
-    top: 330px;   /* Vertical spacing: 150px from top row, moved down */
-}
-
-.table-7 {
-    left: 430px;  /* Spacing: 140px from table 5 */
-    top: 330px;   /* Same horizontal line */
-}
-
-.table-9 {
-    left: 570px;  /* Spacing: 140px from table 7 */
-    top: 330px;   /* Same horizontal line */
-}
-
-/* Adjust table number font size for larger tables */
-.table-number {
-    font-size: 1.8rem; /* Increased from 1.6rem */
-    font-weight: bold;
-    color: #5d4e37;
-    z-index: 2;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-.table-circle.loaded {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.table-circle:hover {
-    transform: scale(1.08);
-    box-shadow: 
-        0 10px 30px rgba(93, 78, 55, 0.3),
-        inset 0 2px 0 rgba(255, 255, 255, 0.2);
-    z-index: 50; /* Higher when hovered, but still below avatars */
-}
-
-/* Prevent avatar position changes during table hover */
-.table-circle:hover .guest-avatar {
-    transform: var(--avatar-position) scale(1) !important;
-}
-
-.table-circle:hover .guest-avatar:hover {
-    transform: var(--avatar-position) scale(1.3) !important;
-}
-
-.table-circle.highlighted {
-    background: linear-gradient(145deg, #8b6f47, #5d4e37);
-    border-color: #2c1810;
-    transform: scale(1.15);
-    animation: pulse-highlight 2s infinite;
-    z-index: 30; /* Highlighted tables above normal ones */
-}
-
-@keyframes pulse-highlight {
-    0% { box-shadow: 0 10px 30px rgba(93, 78, 55, 0.3); }
-    50% { box-shadow: 0 15px 40px rgba(93, 78, 55, 0.5), 0 0 0 10px rgba(93, 78, 55, 0.1); }
-    100% { box-shadow: 0 10px 30px rgba(93, 78, 55, 0.3); }
+    pointer-events: none;
 }
 
 @keyframes gentle-rotate {
@@ -174,82 +37,116 @@
     to { transform: rotate(360deg); }
 }
 
-.table-info {
-    position: absolute;
-    top: -35px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, rgba(93, 78, 55, 0.95), rgba(61, 52, 42, 0.95));
-    color: #f5f0e8;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    opacity: 0;
+/* Leaflet Map Styles */
+#wedding-map {
+    height: 500px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(93, 78, 55, 0.2);
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #f8f5f0, #ede8dd);
+}
+
+/* Custom Leaflet Controls */
+.leaflet-control-container {
+    display: none; /* Hide default Leaflet controls for cleaner look */
+}
+
+.leaflet-popup-content-wrapper {
+    background: linear-gradient(135deg, #f8f5f0, #ede8dd);
+    border: 2px solid #d4c4a8;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(93, 78, 55, 0.3);
+}
+
+.leaflet-popup-content {
+    margin: 15px;
+    color: #5d4e37;
+    font-family: Georgia, serif;
+}
+
+.leaflet-popup-tip {
+    background: #f8f5f0;
+    border: 1px solid #d4c4a8;
+}
+
+/* Custom Table Markers */
+.table-marker {
+    border-radius: 50%;
+    border: 3px solid #b8a082;
+    background: linear-gradient(145deg, #d4c4a8, #c8b99c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5d4e37;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(93, 78, 55, 0.3);
     transition: all 0.3s ease;
-    pointer-events: none;
-    z-index: 1000; /* Increased z-index to show above other tables */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
 
-.table-circle:hover .table-info {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-5px);
-    z-index: 1000; /* Ensure tooltip stays on top */
+.table-marker:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(93, 78, 55, 0.4);
 }
 
-/* Guest avatars around tables */
+.table-marker.highlighted {
+    background: linear-gradient(145deg, #8b6f47, #5d4e37);
+    color: #f5f0e8;
+    border-color: #2c1810;
+    animation: pulse-highlight 2s infinite;
+}
+
+@keyframes pulse-highlight {
+    0% { box-shadow: 0 4px 15px rgba(93, 78, 55, 0.3); }
+    50% { box-shadow: 0 8px 25px rgba(93, 78, 55, 0.5), 0 0 0 8px rgba(93, 78, 55, 0.1); }
+    100% { box-shadow: 0 4px 15px rgba(93, 78, 55, 0.3); }
+}
+
+.table-marker.rectangular {
+    border-radius: 8px;
+}
+
+/* Guest Avatars */
 .guest-avatar {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: linear-gradient(145deg, #8b6f47, #5d4e37);
     border: 2px solid #f5f0e8;
-    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
     color: #f5f0e8;
     font-weight: bold;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    z-index: 100; /* Higher than tables but lower than modals */
+    transition: all 0.3s ease;
+    position: absolute;
+    z-index: 1000;
 }
 
 .guest-avatar:hover {
     transform: scale(1.3);
-    z-index: 200; /* Even higher when hovered */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     border-color: #d4a574;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .guest-avatar.current-guest {
     background: linear-gradient(145deg, #d4a574, #b8935f);
     border-color: #2c1810;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     animation: glow-pulse 2s infinite;
 }
 
 @keyframes glow-pulse {
-    0% { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
-    50% { box-shadow: 0 6px 20px rgba(212, 165, 116, 0.6), 0 0 0 5px rgba(212, 165, 116, 0.2); }
-    100% { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
+    0% { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+    50% { box-shadow: 0 4px 15px rgba(212, 165, 116, 0.6), 0 0 0 4px rgba(212, 165, 116, 0.2); }
+    100% { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
 }
-
-/* Positioning for tables based on the image layout */
-.table-1 { grid-column: 1 / 4; grid-row: 3 / 4; }      /* Horizontal rectangle, left side */
-.table-2 { grid-column: 2 / 6; grid-row: 6 / 7; }      /* Bottom horizontal rectangle */
-.table-3 { grid-column: 2 / 8; grid-row: 1 / 2; }      /* Top horizontal rectangle */
-.table-4 { grid-column: 2 / 3; grid-row: 2 / 3; }
-.table-5 { grid-column: 2 / 3; grid-row: 4 / 5; }
-.table-6 { grid-column: 3 / 4; grid-row: 3 / 4; }
-.table-7 { grid-column: 4 / 5; grid-row: 4 / 5; }
-.table-8 { grid-column: 5 / 6; grid-row: 3 / 4; }
-.table-9 { grid-column: 6 / 7; grid-row: 4 / 5; }
-.table-10 { grid-column: 7 / 8; grid-row: 2 / 3; }
 
 /* Legend */
 .map-legend {
@@ -295,19 +192,19 @@
     box-shadow: 0 8px 25px rgba(139, 111, 71, 0.2);
 }
 
-/* Guest info modal - separate window for guest information */
+/* Guest Info Modal */
 .guest-info-modal {
     position: fixed;
     top: 20px;
     right: 20px;
-    width: 300px;
+    width: 280px;
     background: linear-gradient(135deg, #f8f5f0, #ede8dd);
     border: 2px solid #d4c4a8;
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 10px 30px rgba(93, 78, 55, 0.3);
-    z-index: 10000; /* Very high z-index to stay above everything */
-    transform: translateX(320px);
+    z-index: 10000;
+    transform: translateX(300px);
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     pointer-events: none;
@@ -321,7 +218,7 @@
 
 .guest-info-modal .modal-header {
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
     padding-bottom: 10px;
@@ -374,157 +271,102 @@
     color: #8b6f47;
 }
 
-/* Responsive Design */
-@media (max-width: 968px) {
-    .table-map {
-        height: 480px; /* Adjusted height */
-        max-width: 720px; /* Proportional scaling */
-        transform: scale(0.8);
-        transform-origin: center top;
-    }
-    
-    .table-circle {
-        width: 68px; /* Proportionally scaled */
-        height: 68px;
-    }
-    
-    .table-1 {
-        width: 52px;
-        height: 160px;
-    }
-    
-    .table-2, .table-3 {
-        width: 320px;
-        height: 52px;
-    }
-    
-    /* Maintain increased spacing proportionally */
-    .table-4 {
-        left: 176px;  /* 0.8 scale, centered */
-        top: 144px;
-    }
-
-    .table-6 {
-        left: 288px;  /* Proportional spacing: 112px */
-        top: 144px;
-    }
-
-    .table-8 {
-        left: 400px;  /* Proportional spacing: 112px */
-        top: 144px;
-    }
-
-    .table-10 {
-        left: 512px;  /* Proportional spacing: 112px */
-        top: 144px;
-    }
-
-    .table-5 {
-        left: 232px;  /* Proportional offset for chessboard */
-        top: 264px;   /* Proportional spacing: 120px */
-    }
-
-    .table-7 {
-        left: 344px;  /* Proportional spacing: 112px */
-        top: 264px;
-    }
-
-    .table-9 {
-        left: 456px;  /* Proportional spacing: 112px */
-        top: 264px;
-    }
-    
-    .table-number {
-        font-size: 1.4rem;
-    }
-}
-
+/* Mobile Optimizations */
 @media (max-width: 768px) {
-    .table-map {
-        height: 420px;
-        transform: scale(0.7);
+    .table-map-container {
+        padding: 20px 15px;
+        margin: 20px 0;
     }
     
-    .table-circle {
-        width: 60px;
-        height: 60px;
+    #wedding-map {
+        height: 400px;
     }
     
-    .table-1 {
-        width: 45px;
-        height: 140px;
+    .guest-info-modal {
+        width: calc(100vw - 40px);
+        right: 20px;
+        left: 20px;
+        transform: translateY(100vh);
+        top: auto;
+        bottom: 20px;
     }
     
-    .table-2, .table-3 {
-        width: 280px;
-        height: 45px;
+    .guest-info-modal.show {
+        transform: translateY(0);
     }
     
-    /* Maintain increased spacing at smaller scale */
-    .table-4 {
-        left: 154px;  /* 0.7 scale, centered */
-        top: 126px;
-    }
-
-    .table-6 {
-        left: 252px;  /* Proportional spacing: 98px */
-        top: 126px;
-    }
-
-    .table-8 {
-        left: 350px;  /* Proportional spacing: 98px */
-        top: 126px;
-    }
-
-    .table-10 {
-        left: 448px;  /* Proportional spacing: 98px */
-        top: 126px;
-    }
-
-    .table-5 {
-        left: 203px;  /* Proportional offset for chessboard */
-        top: 231px;   /* Proportional spacing: 105px */
-    }
-
-    .table-7 {
-        left: 301px;  /* Proportional spacing: 98px */
-        top: 231px;
-    }
-
-    .table-9 {
-        left: 399px;  /* Proportional spacing: 98px */
-        top: 231px;
+    .table-marker {
+        font-size: 1rem;
     }
     
-    .table-number {
-        font-size: 1.2rem;
+    .guest-avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+    
+    .guest-avatar.current-guest {
+        width: 24px;
+        height: 24px;
     }
 }
 
 @media (max-width: 480px) {
-    .table-map {
-        height: 360px;
-        transform: scale(0.6);
+    #wedding-map {
+        height: 350px;
     }
     
-    .table-circle {
-        width: 51px;
-        height: 51px;
+    .table-marker {
+        font-size: 0.9rem;
     }
     
-    .table-1 {
-        width: 39px;
-        height: 120px;
+    .guest-avatar {
+        width: 18px;
+        height: 18px;
+        font-size: 0.5rem;
+        border-width: 1px;
     }
     
-    .table-2, .table-3 {
-        width: 240px;
-        height: 39px;
+    .guest-avatar.current-guest {
+        width: 22px;
+        height: 22px;
     }
-    
-    .table-number {
-        font-size: 1rem;
-    }
+}
+
+/* Custom Popup Styles */
+.table-popup {
+    font-family: Georgia, serif;
+}
+
+.table-popup .popup-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #5d4e37;
+    margin-bottom: 10px;
+}
+
+.table-popup .popup-info {
+    color: #6b5b4f;
+    margin-bottom: 8px;
+}
+
+.table-popup .guest-list {
+    margin-top: 10px;
+}
+
+.table-popup .guest-badge {
+    display: inline-block;
+    background: #d4c4a8;
+    color: #5d4e37;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin: 2px;
+}
+
+.table-popup .guest-badge.current {
+    background: #8b6f47;
+    color: #f5f0e8;
 }
 </style>
 {% endblock %}
@@ -600,7 +442,7 @@
         </div>
     </div>
     
-    <!-- Table Map -->
+    <!-- Interactive Map -->
     <div class="row mt-5">
         <div class="col-12">
             <h4 class="text-center mb-4" style="color: #5d4e37;">
@@ -608,32 +450,7 @@
             </h4>
             
             <div class="table-map-container">
-                <div class="table-map">
-                    <!-- Tables positioned according to the image -->
-                    {% for table in tables %}
-                    <div class="table-circle table-{{ table.number }}{% if guest_info and guest_info.table_number == table.number %} highlighted{% endif %}" 
-                         data-table="{{ table.number }}" 
-                         title="Kliknij aby zobaczyć szczegóły">
-                        <div class="table-number">{{ table.number }}</div>
-                        <div class="table-info">
-                            <strong>{{ table.name }}</strong><br>
-                            <small>{{ table.guests_count }}/{{ table.capacity }} osób</small>
-                        </div>
-                        
-                        <!-- Generate guest avatars around the table -->
-                        {% for guest in table.guest_list %}
-                            <div class="guest-avatar{% if guest_info and guest.id == guest_info.id %} current-guest{% endif %}" 
-                                 title="{{ guest.full_name }}"
-                                 data-guest-name="{{ guest.full_name }}"
-                                 data-guest-type="{% if guest.guest_type %}{{ guest.guest_type }}{% else %}Gość{% endif %}"
-                                 data-seat="{{ forloop.counter }}"
-                                 data-table-type="{% if table.number == 1 or table.number == 2 or table.number == 3 %}rectangular{% else %}circular{% endif %}">
-                                {{ guest.user.first_name|first|upper }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
-                </div>
+                <div id="wedding-map"></div>
             </div>
             
             <!-- Legend -->
@@ -645,7 +462,7 @@
                     <div class="col-md-6">
                         <div class="legend-item">
                             <div class="legend-color normal"></div>
-                            <span>Stół okrągły (kliknij aby podświetlić)</span>
+                            <span>Stół okrągły (kliknij aby zobaczyć szczegóły)</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color normal rectangular"></div>
@@ -674,7 +491,7 @@
                 <div class="mt-3 text-center">
                     <small class="text-muted">
                         <i class="fas fa-mouse-pointer"></i> 
-                        Najedź na stoliki i avatary gości aby zobaczyć szczegóły
+                        Kliknij stoliki i avatary gości aby zobaczyć szczegóły. Możesz przybliżać i oddalać mapę.
                     </small>
                 </div>
             </div>
@@ -697,7 +514,7 @@
                             <h6 class="mb-0">
                                 <i class="fas fa-chair"></i> 
                                 Stół {{ table.number }}
-                                {% if table.number == 2 or table.number == 3 %}
+                                {% if table.number <= 3 %}
                                     <small class="badge badge-info ml-1">prostokątny</small>
                                 {% endif %}
                                 {% if guest_info and guest_info.table_number == table.number %}
@@ -772,365 +589,19 @@
     </div>
 </div>
 
-<!-- Enhanced JavaScript for table positioning -->
+<!-- Pass Django data to JavaScript -->
 <script>
-    // Table Map Animation and Interaction Script
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize table animations with staggered delay
-        const tableCircles = document.querySelectorAll('.table-circle');
-        tableCircles.forEach((circle, index) => {
-            setTimeout(() => {
-                circle.classList.add('loaded');
-            }, index * 100);
-        });
-        
-        // Position guest avatars around tables
-        tableCircles.forEach(circle => {
-            positionGuestAvatars(circle);
-        });
-        
-        // Enhanced search functionality
-        initializeSearch();
-        
-        // Table click interactions
-        tableCircles.forEach(circle => {
-            circle.addEventListener('click', function() {
-                handleTableClick(this);
-            });
-        });
-    });
-
-    function positionGuestAvatars(tableCircle) {
-        const avatars = tableCircle.querySelectorAll('.guest-avatar');
-        const totalAvatars = avatars.length;
-        const tableNumber = tableCircle.dataset.table;
-        
-        if (totalAvatars === 0) return;
-        
-        // Different positioning for rectangular vs circular tables
-        const isRectangular = (tableNumber === '1' || tableNumber === '2' || tableNumber === '3');
-        
-        if (isRectangular) {
-            // Position guests around rectangular tables
-            let tableWidth = 200; // Default width
-            
-            // Adjust based on table size
-            if (tableNumber === '1') {
-                // Vertical rectangle - position guests only on the LEFT side
-                const tableHeight = 180; // Approximate height of table 1
-                
-                avatars.forEach((avatar, index) => {
-                    let x = 0, y = 0;
-                    
-                    // Position all guests on the left side vertically spaced
-                    const spacing = tableHeight / (totalAvatars + 1);
-                    x = -60; // Fixed position on the left side
-                    y = -tableHeight/2 + spacing * (index + 1);
-                    
-                    // Store position as CSS custom property
-                    avatar.style.setProperty('--avatar-position', `translate(${x}px, ${y}px)`);
-                    
-                    // Apply initial position with animation
-                    avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
-                    avatar.style.opacity = '0';
-                    
-                    // Animate in with delay
-                    setTimeout(() => {
-                        avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                        avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-                        avatar.style.opacity = '1';
-                    }, 200 + (index * 50));
-                });
-                
-            } else {
-                // Horizontal rectangles (tables 2 & 3) - position along top and bottom edges with much larger spacing between guests
-                if (tableNumber === '2') {
-                    tableWidth = 500; // Much larger for spacing between guests
-                } else if (tableNumber === '3') {
-                    tableWidth = 600; // Much larger for spacing between guests
-                }
-                
-                avatars.forEach((avatar, index) => {
-                    let x = 0, y = 0;
-                    
-                    if (totalAvatars <= 2) {
-                        // Simple top/bottom positioning for few guests
-                        if (index === 0) {
-                            x = 0; y = -60; // Back to original distance from table
-                        } else {
-                            x = 0; y = 60;  // Back to original distance from table
-                        }
-                    } else {
-                        // Distribute evenly along top and bottom edges with much larger gaps between guests
-                        const guestsPerSide = Math.ceil(totalAvatars / 2);
-                        const spacing = tableWidth / (guestsPerSide + 1); // This creates larger gaps between guests
-                        
-                        if (index < guestsPerSide) {
-                            // Top edge - evenly spaced with much larger gaps between guests
-                            x = -tableWidth/2 + spacing * (index + 1);
-                            y = -60; // Original distance from table (was -90)
-                        } else {
-                            // Bottom edge - evenly spaced with much larger gaps between guests
-                            const bottomIndex = index - guestsPerSide;
-                            x = -tableWidth/2 + spacing * (bottomIndex + 1);
-                            y = 60; // Original distance from table (was 90)
-                        }
-                    }
-                    
-                    // Store position as CSS custom property
-                    avatar.style.setProperty('--avatar-position', `translate(${x}px, ${y}px)`);
-                    
-                    // Apply initial position with animation
-                    avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
-                    avatar.style.opacity = '0';
-                    
-                    // Animate in with delay
-                    setTimeout(() => {
-                        avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                        avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-                        avatar.style.opacity = '1';
-                    }, 200 + (index * 50));
-                });
-            }
-        } else {
-            // Circular table positioning with reduced radius
-            const radius = 55; // Reduced from 70 to bring avatars closer to tables
-            const angleStep = 360 / totalAvatars;
-            
-            avatars.forEach((avatar, index) => {
-                const angle = (angleStep * index) - 90; // Start from top
-                const radian = (angle * Math.PI) / 180;
-                
-                const x = Math.cos(radian) * radius;
-                const y = Math.sin(radian) * radius;
-                
-                // Store position as CSS custom property
-                avatar.style.setProperty('--avatar-position', `translate(${x}px, ${y}px)`);
-                
-                // Apply initial position with animation
-                avatar.style.transform = `translate(${x}px, ${y}px) scale(0)`;
-                avatar.style.opacity = '0';
-                
-                // Animate in with delay
-                setTimeout(() => {
-                    avatar.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    avatar.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-                    avatar.style.opacity = '1';
-                }, 200 + (index * 50));
-            });
-        }
-        
-        // Add hover effects that preserve position and show guest modal
-        avatars.forEach(avatar => {
-            avatar.addEventListener('mouseenter', function() {
-                const position = this.style.getPropertyValue('--avatar-position');
-                this.style.transform = `${position} scale(1.3)`;
-            });
-            
-            avatar.addEventListener('mouseleave', function() {
-                const position = this.style.getPropertyValue('--avatar-position');
-                this.style.transform = `${position} scale(1)`;
-            });
-            
-            // Click event for guest modal
-            avatar.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevent table click
-                showGuestModal(this);
-            });
-        });
-    }
-
-    function handleTableClick(tableCircle) {
-        const tableNumber = tableCircle.dataset.table;
-        
-        // Remove highlights from other tables
-        document.querySelectorAll('.table-circle').forEach(circle => {
-            if (circle !== tableCircle) {
-                circle.classList.remove('highlighted');
-            }
-        });
-        
-        document.querySelectorAll('.table-card').forEach(card => {
-            card.classList.remove('highlighted-card');
-        });
-        
-        // Toggle current table highlight
-        const isHighlighted = tableCircle.classList.toggle('highlighted');
-        
-        if (isHighlighted) {
-            // Highlight corresponding card
-            const tableCard = document.querySelector(`[data-table-card="${tableNumber}"]`);
-            if (tableCard) {
-                tableCard.classList.add('highlighted-card');
-                tableCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-            
-            // Animate guest avatars
-            const avatars = tableCircle.querySelectorAll('.guest-avatar');
-            avatars.forEach((avatar, index) => {
-                setTimeout(() => {
-                    avatar.style.animation = 'bounce 0.6s ease';
-                }, index * 100);
-            });
-            
-            showNotification(`Wybrano stół ${tableNumber}`, 'success');
-        }
-    }
-
-    function initializeSearch() {
-        const searchInput = document.querySelector('#table-search-form input');
-        if (!searchInput) return;
-        
-        let searchTimeout;
-        
-        searchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            
-            clearTimeout(searchTimeout);
-            clearTableHighlights();
-            
-            if (query.length < 2) return;
-            
-            searchTimeout = setTimeout(() => {
-                performSearch(query);
-            }, 300);
-        });
-    }
-
-    function performSearch(query) {
-        fetch(`{% url 'wedding:ajax_table_search' %}?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.found && data.table_number !== 'Nie przypisano') {
-                    highlightTable(data.table_number);
-                    highlightGuest(data);
-                }
-            })
-            .catch(error => {
-                console.error('Search error:', error);
-            });
-    }
-
-    function highlightTable(tableNumber) {
-        const tableCircle = document.querySelector(`[data-table="${tableNumber}"]`);
-        if (tableCircle) {
-            clearTableHighlights();
-            tableCircle.classList.add('highlighted');
-            tableCircle.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-
-    function highlightGuest(guestData) {
-        // Find and highlight specific guest avatar
-        const allAvatars = document.querySelectorAll('.guest-avatar');
-        allAvatars.forEach(avatar => {
-            avatar.classList.remove('current-guest');
-            if (avatar.title === guestData.guest_name) {
-                avatar.classList.add('current-guest');
-            }
-        });
-    }
-
-    function clearTableHighlights() {
-        document.querySelectorAll('.table-circle').forEach(circle => {
-            circle.classList.remove('highlighted');
-        });
-        document.querySelectorAll('.table-card').forEach(card => {
-            card.classList.remove('highlighted-card');
-        });
-    }
-
-    function showGuestModal(avatarElement) {
-        const guestName = avatarElement.title || avatarElement.getAttribute('data-guest-name');
-        const tableNumber = avatarElement.closest('.table-circle').dataset.table;
-        const guestType = avatarElement.getAttribute('data-guest-type') || 'Gość';
-        const seatNumber = avatarElement.getAttribute('data-seat') || 'Nie określono';
-        
-        // Update modal content
-        document.getElementById('guest-name').textContent = guestName || 'Nieznany gość';
-        document.getElementById('guest-table').textContent = tableNumber || '-';
-        document.getElementById('guest-type').textContent = guestType;
-        document.getElementById('guest-seat').textContent = seatNumber;
-        
-        // Show modal
-        const modal = document.getElementById('guest-info-modal');
-        modal.classList.add('show');
-        
-        // Auto-hide after 5 seconds
-        clearTimeout(window.guestModalTimeout);
-        window.guestModalTimeout = setTimeout(() => {
-            hideGuestModal();
-        }, 5000);
-    }
-
-    function hideGuestModal() {
-        const modal = document.getElementById('guest-info-modal');
-        modal.classList.remove('show');
-        clearTimeout(window.guestModalTimeout);
-    }
-
-    function showGuestTooltip(element) {
-        // This function is no longer used, but kept for compatibility
-        // Guest info is now shown in the modal instead
-        return;
-    }
-
-    function hideGuestTooltip() {
-        // This function is no longer used, but kept for compatibility
-        return;
-    }
-
-    function showNotification(message, type = 'info') {
-        // Simple notification system
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} position-fixed`;
-        notification.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 250px;';
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="close" onclick="this.parentElement.remove()">
-                <span>&times;</span>
-            </button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 3000);
-    }
-
-    function hideGuestModal() {
-        const modal = document.getElementById('guest-info-modal');
-        if (modal) {
-            modal.classList.remove('show');
-            modal.style.transform = 'translateX(320px)';
-            modal.style.opacity = '0';
-            modal.style.pointerEvents = 'none';
-        }
-    }
-
-    // Reset avatar animations after they complete
-    document.addEventListener('animationend', function(e) {
-        if (e.target.classList.contains('guest-avatar')) {
-            e.target.style.animation = '';
-        }
-    });
-
-    // Close guest modal when clicking outside
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('guest-info-modal');
-        if (modal && modal.classList.contains('show') && !modal.contains(e.target) && !e.target.classList.contains('guest-avatar')) {
-            hideGuestModal();
-        }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            hideGuestModal();
-        }
-    });
+    window.weddingData = {
+        tables: {{ tables_json|safe }},
+        currentGuestInfo: {{ guest_info_json|safe }},
+        searchUrl: '{% url "wedding:ajax_table_search" %}',
+        isMobile: {% if request|is_mobile_device %}true{% else %}false{% endif %}
+    };
 </script>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="{% static 'wedding/js/table_map_leaflet.js' %}"></script>
 {% endblock %}

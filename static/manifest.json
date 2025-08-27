@@ -1,0 +1,141 @@
+{
+    "name": "Nasze Wesele - Aplikacja Weselna",
+    "short_name": "Nasze Wesele",
+    "description": "Aplikacja weselna do dzielenia się zdjęciami i wspomnieniami z uroczystości",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#8b6f47",
+    "background_color": "#f5f0e8",
+    "scope": "/",
+    "lang": "pl",
+    "categories": ["lifestyle", "social", "photography"],
+    "icons": [
+        {
+            "src": "/static/wedding/images/icon-72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/wedding/images/icon-96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/wedding/images/icon-128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/wedding/images/icon-144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/wedding/images/icon-152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/wedding/images/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/wedding/images/icon-384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/wedding/images/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/static/wedding/images/screenshot-mobile.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/static/wedding/images/screenshot-tablet.png",
+            "sizes": "768x1024",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Galeria Zdjęć",
+            "short_name": "Galeria",
+            "description": "Przeglądaj zdjęcia z wesela",
+            "url": "/gallery/",
+            "icons": [
+                {
+                    "src": "/static/wedding/images/gallery-icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Prześlij Zdjęcie",
+            "short_name": "Prześlij",
+            "description": "Dodaj swoje zdjęcie z wesela",
+            "url": "/upload/",
+            "icons": [
+                {
+                    "src": "/static/wedding/images/upload-icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Znajdź Stół",
+            "short_name": "Stół",
+            "description": "Sprawdź swój numer stołu",
+            "url": "/table-finder/",
+            "icons": [
+                {
+                    "src": "/static/wedding/images/table-icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Harmonogram",
+            "short_name": "Harmonogram",
+            "description": "Zobacz plan wydarzeń",
+            "url": "/schedule/",
+            "icons": [
+                {
+                    "src": "/static/wedding/images/schedule-icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "protocol_handlers": [],
+    "file_handlers": [
+        {
+            "action": "/upload/",
+            "accept": {
+                "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic"]
+            }
+        }
+    ]
+}

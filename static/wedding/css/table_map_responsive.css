@@ -1,0 +1,447 @@
+/* Wedding Table Map - Enhanced Mobile Responsive Styles */
+
+/* Base Mobile Optimizations */
+@media (max-width: 768px) {
+    .table-map-container {
+        padding: 15px 10px;
+        margin: 15px -15px; /* Full width on mobile */
+        border-radius: 15px;
+    }
+    
+    #wedding-map {
+        height: 400px;
+        border-radius: 10px;
+    }
+    
+    /* Mobile-optimized Leaflet controls */
+    .leaflet-control-zoom {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .leaflet-control-zoom a {
+        width: 35px !important;
+        height: 35px !important;
+        line-height: 35px !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+        margin: 2px !important;
+    }
+    
+    /* Mobile popup adjustments */
+    .leaflet-popup-content-wrapper {
+        border-radius: 10px;
+        min-width: 200px;
+        max-width: 280px;
+    }
+    
+    .leaflet-popup-content {
+        margin: 12px;
+        font-size: 0.9rem;
+    }
+    
+    /* Table markers - slightly smaller on mobile */
+    .table-marker {
+        font-size: 1rem !important;
+    }
+    
+    /* Guest avatars - smaller on mobile */
+    .guest-avatar {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 0.6rem !important;
+        border-width: 1px !important;
+    }
+    
+    .guest-avatar.current-guest {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    /* Mobile guest modal adjustments */
+    .guest-info-modal {
+        width: calc(100vw - 20px) !important;
+        right: 10px !important;
+        left: 10px !important;
+        bottom: 20px !important;
+        top: auto !important;
+        transform: translateY(100vh) !important;
+        border-radius: 15px 15px 0 0;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+    
+    .guest-info-modal.show {
+        transform: translateY(0) !important;
+    }
+    
+    /* Table popup styles for mobile */
+    .table-popup .popup-title {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+    
+    .table-popup .popup-info {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+    
+    .table-popup .guest-badge {
+        font-size: 0.7rem;
+        padding: 1px 6px;
+        margin: 1px;
+    }
+    
+    /* Map legend mobile adjustments */
+    .map-legend {
+        padding: 15px;
+        margin: 20px 0;
+        font-size: 0.9rem;
+    }
+    
+    .legend-item {
+        margin: 8px 0;
+        font-size: 0.85rem;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        margin-right: 12px;
+    }
+    
+    .legend-color.rectangular {
+        width: 24px;
+        height: 12px;
+    }
+    
+    /* Touch-friendly search form */
+    .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 12px 15px;
+    }
+    
+    .btn-custom-primary {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    /* Table cards mobile layout */
+    .table-card {
+        margin-bottom: 15px;
+    }
+    
+    .table-card .card-header {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .table-card .card-body {
+        padding: 15px;
+    }
+    
+    .table-card .badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+}
+
+/* Small mobile devices (iPhone SE, etc.) */
+@media (max-width: 480px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .table-map-container {
+        margin: 15px -10px;
+        padding: 12px 8px;
+    }
+    
+    #wedding-map {
+        height: 350px;
+        border-radius: 8px;
+    }
+    
+    .leaflet-control-zoom a {
+        width: 32px !important;
+        height: 32px !important;
+        line-height: 32px !important;
+        font-size: 14px !important;
+    }
+    
+    .table-marker {
+        font-size: 0.9rem !important;
+    }
+    
+    .guest-avatar {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.5rem !important;
+    }
+    
+    .guest-avatar.current-guest {
+        width: 22px !important;
+        height: 22px !important;
+    }
+    
+    .leaflet-popup-content-wrapper {
+        max-width: 250px;
+        min-width: 180px;
+    }
+    
+    .leaflet-popup-content {
+        margin: 10px;
+        font-size: 0.85rem;
+    }
+    
+    .table-popup .popup-title {
+        font-size: 1rem;
+    }
+    
+    .table-popup .popup-info {
+        font-size: 0.8rem;
+    }
+    
+    .table-popup .guest-badge {
+        font-size: 0.65rem;
+        padding: 1px 4px;
+    }
+    
+    .map-legend {
+        padding: 12px;
+        margin: 15px 0;
+    }
+    
+    .legend-item {
+        font-size: 0.8rem;
+        margin: 6px 0;
+    }
+    
+    .legend-color {
+        width: 14px;
+        height: 14px;
+        margin-right: 10px;
+    }
+    
+    .legend-color.rectangular {
+        width: 20px;
+        height: 10px;
+    }
+    
+    /* Search results mobile */
+    .table-result {
+        margin-top: 15px;
+        padding: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .table-result h4 {
+        font-size: 1.2rem;
+    }
+    
+    .alert {
+        margin-top: 15px;
+        padding: 12px 15px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+    #wedding-map {
+        height: 300px;
+    }
+    
+    .guest-info-modal {
+        max-height: 60vh;
+    }
+    
+    .table-map-container {
+        margin: 10px -15px;
+    }
+}
+
+/* Very small screens (old iPhones, etc.) */
+@media (max-width: 380px) {
+    #wedding-map {
+        height: 320px;
+    }
+    
+    .table-marker {
+        font-size: 0.8rem !important;
+    }
+    
+    .guest-avatar {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 0.45rem !important;
+    }
+    
+    .guest-avatar.current-guest {
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    .leaflet-popup-content-wrapper {
+        max-width: 200px;
+        min-width: 160px;
+    }
+    
+    .leaflet-control-zoom a {
+        width: 28px !important;
+        height: 28px !important;
+        line-height: 28px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* High-DPI displays (Retina) optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .table-marker,
+    .guest-avatar {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+    
+    .leaflet-popup-content-wrapper {
+        border-width: 1px;
+    }
+}
+
+/* Touch-specific optimizations */
+@media (pointer: coarse) {
+    /* Larger touch targets for better UX */
+    .guest-avatar {
+        min-width: 24px;
+        min-height: 24px;
+    }
+    
+    .table-marker {
+        min-width: 50px;
+        min-height: 50px;
+    }
+    
+    /* Better hover states for touch */
+    .leaflet-popup-close-button {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 18px !important;
+    }
+    
+    /* Prevent text selection on touch */
+    .leaflet-popup-content,
+    .table-popup,
+    .guest-info-modal {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+}
+
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+    .table-map-container {
+        background: linear-gradient(135deg, #2d2620 0%, #3a3025 100%);
+    }
+    
+    .guest-info-modal {
+        background: linear-gradient(135deg, #2d2620, #3a3025);
+        border-color: #5d4e37;
+        color: #f5f0e8;
+    }
+    
+    .leaflet-popup-content-wrapper {
+        background: linear-gradient(135deg, #2d2620, #3a3025);
+        border-color: #5d4e37;
+        color: #f5f0e8;
+    }
+    
+    .leaflet-popup-tip {
+        background: #2d2620;
+        border-color: #5d4e37;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .guest-avatar,
+    .table-marker,
+    .guest-info-modal,
+    .leaflet-popup-content-wrapper {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    .leaflet-zoom-animated .leaflet-zoom-hide {
+        visibility: hidden;
+    }
+}
+
+/* Print styles for table information */
+@media print {
+    .table-map-container,
+    #wedding-map,
+    .leaflet-container,
+    .guest-info-modal {
+        display: none !important;
+    }
+    
+    .map-legend {
+        display: none !important;
+    }
+    
+    .table-card {
+        break-inside: avoid;
+        margin-bottom: 15px;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Focus states for accessibility */
+.leaflet-control-zoom a:focus,
+.guest-avatar:focus,
+.table-marker:focus {
+    outline: 2px solid #8b6f47;
+    outline-offset: 2px;
+}
+
+/* Loading states for better UX */
+.leaflet-container.leaflet-loading {
+    cursor: wait;
+}
+
+#wedding-map.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid #d4c4a8;
+    border-top-color: #8b6f47;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Network-aware optimizations */
+@media (prefers-reduced-data: reduce) {
+    .table-map-container::before {
+        display: none; /* Remove decorative background animation */
+    }
+    
+    .guest-avatar,
+    .table-marker {
+        box-shadow: none; /* Reduce visual complexity */
+    }
+}
