@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
         # Create wedding info
         wedding_info, created = WeddingInfo.objects.get_or_create(
-            bride_name="Anna",
-            groom_name="Marek",
+            bride_name="Aleksandra",
+            groom_name="Bartłomiej",
             defaults={
                 'wedding_date': date(2024, 6, 15),
                 'venue_name': "Pałac Romantyczny",
