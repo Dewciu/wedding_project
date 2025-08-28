@@ -1,0 +1,1 @@
+web: gunicorn bartek-ola-wedding.wsgi
