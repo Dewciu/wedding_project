@@ -165,11 +165,6 @@ class WeddingAccessMiddleware:
                     3. Kliknij w link<br>
                     4. Gotowe! 🎉
                 </div>
-                <div class="demo-link">
-                    <small>
-                        Demo: <a href="?token=DEMO2024" style="color: #8b6f47;">Kliknij tutaj aby przetestować</a>
-                    </small>
-                </div>
             </div>
         </body>
         </html>
