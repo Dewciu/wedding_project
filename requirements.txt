@@ -6,3 +6,4 @@ crispy-bootstrap4==2022.1
 qrcode==8.2
 whitenoise==6.6.0
 gunicorn==21.2.0
+dj-database-url==3.0.1
