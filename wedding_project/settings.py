@@ -102,3 +102,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Dla developm
 # EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = 'wesele@example.com'
 ADMIN_EMAIL = 'admin@example.com'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://weddingproject-production.up.railway.app',
+    'https://*.up.railway.app',  # dla wszystkich aplikacji Railway
+    'http://localhost:8000',     # dla local development
+    'http://127.0.0.1:8000',     # dla local development
+]
