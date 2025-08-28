@@ -1,32 +1,25 @@
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from django.http import HttpResponse
-from django.views.generic import RedirectView
+from django.urls import path
+from . import views
 
-def favicon_view(request):
-    # Simple favicon response - you can replace with actual favicon.ico file
-    return HttpResponse(
-        (
-            b'\x00\x00\x01\x00\x01\x00\x10\x10\x00\x00\x01\x00\x08\x00h\x05\x00\x00'
-            b'\x16\x00\x00\x00(\x00\x00\x00\x10\x00\x00\x00 \x00\x00\x00\x01\x00\x08'
-            b'\x00\x00\x00\x00\x00@\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-            b'\x01\x00\x00\x00\x01\x00\x00'
-        ),
-        content_type="image/x-icon"
-    )
+app_name = 'wedding'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('favicon.ico', favicon_view, name='favicon'),
-    path('', include('wedding.urls')),
+    # Główne strony aplikacji
+    path('', views.home, name='home'),
+    path('upload/', views.upload_photo, name='upload'),
+    path('gallery/', views.gallery, name='gallery'),
+    path('table-finder/', views.table_finder, name='table_finder'),
+    path('schedule/', views.schedule, name='schedule'),
+    path('menu/', views.menu, name='menu'),
+    
+    # AJAX endpoints
+    path('ajax/table-search/', views.ajax_table_search, name='ajax_table_search'),
+    
+    # Admin utilities (dla organizatorów)
+    path('admin-tools/qr-generator/', views.generate_qr_code, name='qr_generator'),
 ]
 
-# Static files handling
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-else:
-    # In production, whitenoise will handle static files
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Usuwamy:
+# - path('register/', views.register, name='register'),
+# - path('login/', auth_views.LoginView.as_view(template_name='wedding/login.html'), name='login'),
+# - path('logout/', auth_views.LogoutView.as_view(), name='logout'),
