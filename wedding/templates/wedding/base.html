@@ -32,12 +32,10 @@
                 <span class="nav-icon"><i class="fas fa-home"></i></span>
                 Strona Główna
             </a>
-            {% if user.is_authenticated %}
             <a href="{% url 'wedding:upload' %}" class="nav-item {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
                 <span class="nav-icon"><i class="fas fa-camera"></i></span>
-                Prześlij Zdjęcie
+                Dodaj Zdjęcia
             </a>
-            {% endif %}
             <a href="{% url 'wedding:gallery' %}" class="nav-item {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">
                 <span class="nav-icon"><i class="fas fa-images"></i></span>
                 Galeria Zdjęć
@@ -76,17 +74,6 @@
             {% endblock %}
         </main>
 
-        <!-- Auth Links -->
-        <div class="auth-links">
-            {% if user.is_authenticated %}
-                <span>Witaj, {{ user.first_name }}!</span>
-                <a href="{% url 'wedding:logout' %}">Wyloguj</a>
-            {% else %}
-                <a href="{% url 'wedding:login' %}">Zaloguj</a>
-                <a href="{% url 'wedding:register' %}">Rejestracja</a>
-            {% endif %}
-        </div>
-
         <!-- Footer -->
         <footer class="footer">
             {% if wedding_info %}
@@ -95,6 +82,13 @@
             <p class="footer-subtitle">
                 Dziękujemy, że jesteście z nami w tym wyjątkowym dniu! ❤️
             </p>
+            <div style="margin-top: 15px; font-size: 0.8rem; opacity: 0.7;">
+                <p>🎉 Aplikacja Weselna - Dzielcie się wspomnieniami!</p>
+                <!-- Informacja o dostępie dla administratorów -->
+                {% if user.is_staff %}
+                <p><a href="{% url 'wedding:qr_generator' %}" style="color: #d4a574;">📱 Generator QR</a></p>
+                {% endif %}
+            </div>
         </footer>
     </div>
 

@@ -7,17 +7,52 @@
         <h2>Witamy na naszym weselu!</h2>
         <p>{{ wedding_info.welcome_message|default:"Cieszymy się, że możecie być z nami w tym wyjątkowym dniu. Ta aplikacja pozwoli Wam dzielić się wspomnieniami, przeglądać zdjęcia i być na bieżąco z harmonogramem uroczystości." }}</p>
         <p style="margin-top: 15px; font-style: italic;">Pamiętajcie - każde zdjęcie, które prześlecie, zostanie częścią naszej wspólnej opowieści!</p>
+        
+        <!-- Szybkie akcje dla gości -->
+        <div class="quick-actions" style="margin-top: 25px; text-align: center;">
+            <a href="{% url 'wedding:upload' %}" class="btn btn-custom-primary" style="margin: 5px;">
+                <i class="fas fa-camera"></i> Prześlij Zdjęcie
+            </a>
+            <a href="{% url 'wedding:table_finder' %}" class="btn btn-custom-primary" style="margin: 5px;">
+                <i class="fas fa-chair"></i> Znajdź Swój Stół
+            </a>
+        </div>
     </div>
     {% endif %}
 
     {% if featured_photos %}
-    <h3 class="text-center mb-4" style="color: #5d4e37;">Wyróżnione zdjęcia</h3>
+    <h3 class="text-center mb-4" style="color: #5d4e37;">⭐ Wyróżnione zdjęcia</h3>
     <div class="photo-grid">
         {% for photo in featured_photos %}
-        <div class="photo-item">
+        <div class="photo-item" data-toggle="modal" data-target="#photoModal{{ photo.id }}">
             <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
             <div class="photo-overlay">
                 <h5>{{ photo.title }}</h5>
+                <small>{{ photo.uploader_display_name }}</small>
+            </div>
+        </div>
+        
+        <!-- Modal dla wyróżnionych zdjęć -->
+        <div class="modal fade" id="photoModal{{ photo.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ photo.title }}</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid">
+                        {% if photo.description %}
+                        <p class="mt-3">{{ photo.description }}</p>
+                        {% endif %}
+                        <p class="text-muted">
+                            Przesłane przez: {{ photo.uploader_display_name }}<br>
+                            {{ photo.upload_date|date:"j F Y, H:i" }}
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -25,25 +60,100 @@
     {% endif %}
 
     {% if recent_photos %}
-    <h3 class="text-center mt-5 mb-4" style="color: #5d4e37;">Najnowsze zdjęcia</h3>
+    <h3 class="text-center mt-5 mb-4" style="color: #5d4e37;">📷 Najnowsze zdjęcia</h3>
     <div class="photo-grid">
         {% for photo in recent_photos %}
-        <div class="photo-item">
+        <div class="photo-item" data-toggle="modal" data-target="#recentPhotoModal{{ photo.id }}">
             {% if photo.image %}
                 <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
             {% else %}
                 <div class="photo-placeholder">{{ photo.title }}</div>
             {% endif %}
+            <div class="photo-overlay">
+                <h6>{{ photo.title }}</h6>
+                <small>{{ photo.uploader_display_name }}</small>
+            </div>
+        </div>
+        
+        <!-- Modal dla najnowszych zdjęć -->
+        <div class="modal fade" id="recentPhotoModal{{ photo.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ photo.title }}</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid">
+                        {% if photo.description %}
+                        <p class="mt-3">{{ photo.description }}</p>
+                        {% endif %}
+                        <p class="text-muted">
+                            Przesłane przez: {{ photo.uploader_display_name }}<br>
+                            {{ photo.upload_date|date:"j F Y, H:i" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
         {% endfor %}
+    </div>
+    
+    <!-- Link do pełnej galerii -->
+    <div class="text-center mt-4">
+        <a href="{% url 'wedding:gallery' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-images"></i> Zobacz Wszystkie Zdjęcia
+        </a>
     </div>
     {% endif %}
 
     {% if not featured_photos and not recent_photos %}
     <div class="text-center mt-5">
-        <h3 style="color: #7a6b5d;">Zdjęcia będą dostępne wkrótce!</h3>
-        <p>Goście będą mogli przesyłać zdjęcia po zalogowaniu się.</p>
+        <div style="background: #f8f5f0; padding: 40px; border-radius: 15px; border: 1px solid #d4c4a8;">
+            <h3 style="color: #7a6b5d; margin-bottom: 20px;">📸 Galeria czeka na Wasze zdjęcia!</h3>
+            <p style="color: #6b5b4f; margin-bottom: 25px;">
+                Bądźcie pierwsi! Prześlij swoje najpiękniejsze momenty z naszego wesela.
+                Wszystkie zdjęcia będą widoczne dla innych gości po zatwierdzeniu.
+            </p>
+            <a href="{% url 'wedding:upload' %}" class="btn btn-custom-primary btn-lg">
+                <i class="fas fa-camera"></i> Prześlij Pierwsze Zdjęcie
+            </a>
+        </div>
     </div>
     {% endif %}
+    
+    <!-- Informacyjna sekcja na dole -->
+    <div class="info-section" style="margin-top: 50px; text-align: center;">
+        <div style="background: #ede8dd; padding: 30px; border-radius: 15px; border: 1px solid #d4c4a8;">
+            <h4 style="color: #5d4e37; margin-bottom: 20px;">
+                <i class="fas fa-heart"></i> Zapraszamy do wspólnego tworzenia wspomnień!
+            </h4>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div style="color: #6b5b4f;">
+                        <i class="fas fa-camera-retro" style="font-size: 2rem; color: #8b6f47; margin-bottom: 10px;"></i>
+                        <h6>Przesyłajcie Zdjęcia</h6>
+                        <small>Każdy moment jest ważny</small>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div style="color: #6b5b4f;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 2rem; color: #8b6f47; margin-bottom: 10px;"></i>
+                        <h6>Sprawdzajcie Stoły</h6>
+                        <small>Znajdźcie swoje miejsca</small>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div style="color: #6b5b4f;">
+                        <i class="fas fa-calendar-alt" style="font-size: 2rem; color: #8b6f47; margin-bottom: 10px;"></i>
+                        <h6>Śledźcie Program</h6>
+                        <small>Nie przegapcie ważnych momentów</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

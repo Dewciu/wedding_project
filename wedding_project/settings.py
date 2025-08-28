@@ -8,6 +8,9 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+# Token dostępu do aplikacji weselnej (zmień w produkcji!)
+WEDDING_ACCESS_TOKEN = config('WEDDING_ACCESS_TOKEN', default='DEMO2024')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -28,6 +31,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Nasze middleware dla dostępu przez token
+    'wedding.middleware.WeddingAccessMiddleware',
+    'wedding.middleware.WeddingSetupMiddleware',
 ]
 
 ROOT_URLCONF = 'wedding_project.urls'
@@ -82,3 +88,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
+
+# Ustawienia sesji - wydłużamy czas sesji
+SESSION_COOKIE_AGE = 86400 * 7  # 7 dni
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Email settings (opcjonalnie)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Dla developmentu
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = 'wesele@example.com'
+ADMIN_EMAIL = 'admin@example.com'

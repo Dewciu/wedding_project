@@ -1,34 +1,449 @@
 {% extends 'wedding/base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Prześlij Zdjęcie - {{ block.super }}{% endblock %}
+{% block title %}Prześlij Zdjęcia - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-drop-zone {
+        border: 3px dashed #d4c4a8;
+        border-radius: 15px;
+        padding: 40px 20px;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f5f0, #ede8dd);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .upload-drop-zone:hover {
+        border-color: #8b6f47;
+        background: linear-gradient(135deg, #f0e8dd, #e8ddd0);
+        transform: scale(1.02);
+    }
+    
+    .upload-drop-zone.dragover {
+        border-color: #5d4e37;
+        background: linear-gradient(135deg, #e8ddd4, #ddd2c5);
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(93, 78, 55, 0.2);
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #8b6f47;
+        margin-bottom: 15px;
+    }
+    
+    .photo-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .photo-preview-item {
+        position: relative;
+        background: white;
+        border-radius: 10px;
+        padding: 5px;
+        box-shadow: 0 2px 8px rgba(93, 78, 55, 0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .photo-preview-item:hover {
+        transform: scale(1.05);
+    }
+    
+    .photo-preview-img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+    
+    .photo-preview-name {
+        font-size: 0.7rem;
+        color: #6b5b4f;
+        text-align: center;
+        padding: 5px 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .photo-remove-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 24px;
+        height: 24px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .photo-remove-btn:hover {
+        background: #c82333;
+        transform: scale(1.1);
+    }
+    
+    .upload-progress {
+        background: #f8f5f0;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        border: 1px solid #d4c4a8;
+    }
+    
+    .progress-bar-custom {
+        height: 20px;
+        background: linear-gradient(90deg, #8b6f47, #5d4e37);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+    
+    .file-count-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #8b6f47;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+        .upload-drop-zone {
+            padding: 30px 15px;
+            min-height: 120px;
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+        }
+        
+        .photo-preview-grid {
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .photo-preview-img {
+            height: 80px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2 class="section-title">Prześlij Swoje Zdjęcie</h2>
+    <h2 class="section-title">📸 Prześlij Swoje Zdjęcia</h2>
     
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card card-custom">
-                <div class="card-body">
-                    {% crispy form %}
-                </div>
+        <div class="col-md-10">
+            <!-- Główna informacja -->
+            <div class="welcome-info mb-4" style="background: #f8f5f0; padding: 20px; border-radius: 10px; border: 1px solid #d4c4a8; text-align: center;">
+                <h5 style="color: #5d4e37; margin-bottom: 15px;">
+                    <i class="fas fa-images"></i> Prześlij wiele zdjęć naraz!
+                </h5>
+                <p style="color: #6b5b4f; margin-bottom: 10px;">
+                    Wybierz wszystkie swoje najpiękniejsze zdjęcia z wesela i prześlij je jednym kliknięciem.
+                </p>
+                <p style="color: #6b5b4f; margin-bottom: 0; font-size: 0.9rem;">
+                    <strong>Proste:</strong> Bez tytułów, bez opisów - po prostu wybierz zdjęcia i gotowe! ✨
+                </p>
             </div>
             
+            <!-- Formularz -->
+            <form method="post" enctype="multipart/form-data" id="multi-upload-form">
+                {% csrf_token %}
+                
+                <!-- Strefa drop & upload -->
+                <div class="upload-drop-zone" id="drop-zone">
+                    <div id="upload-prompt">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h4 style="color: #5d4e37; margin-bottom: 10px;">Przeciągnij zdjęcia tutaj</h4>
+                        <p style="color: #6b5b4f; margin-bottom: 15px;">lub kliknij aby wybrać z telefonu</p>
+                        <button type="button" class="btn btn-custom-primary" onclick="document.getElementById('photo-files').click()">
+                            <i class="fas fa-images"></i> Wybierz Zdjęcia
+                        </button>
+                    </div>
+                    
+                    <!-- Licznik plików -->
+                    <div id="file-count" class="file-count-badge" style="display: none;">
+                        0 zdjęć
+                    </div>
+                </div>
+                
+                <!-- Ukryte pole pliku -->
+                <input type="file" 
+                       id="photo-files" 
+                       name="photos" 
+                       multiple 
+                       accept="image/*" 
+                       style="display: none;">
+                
+                <!-- Podgląd zdjęć -->
+                <div id="photo-preview" class="photo-preview-grid"></div>
+                
+                <!-- Opcjonalne detale (domyślnie zwinięte) -->
+                <div class="details-section mt-4" style="background: #f8f5f0; border-radius: 10px; border: 1px solid #d4c4a8;">
+                    <button type="button" class="btn btn-link w-100 text-left" 
+                            data-toggle="collapse" 
+                            data-target="#optional-details" 
+                            style="color: #5d4e37; text-decoration: none; padding: 15px;">
+                        <i class="fas fa-chevron-right" id="details-chevron"></i>
+                        <strong>Opcjonalnie: Dodaj swoje imię lub komentarz</strong>
+                        <small class="text-muted d-block">Kliknij jeśli chcesz dodać detale</small>
+                    </button>
+                    
+                    <div class="collapse" id="optional-details">
+                        <div style="padding: 0 15px 15px;">
+                            <div class="form-group">
+                                <label>Twoje imię (opcjonalnie):</label>
+                                <input type="text" name="uploader_name" class="form-control" placeholder="np. Anna i Tomek">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Kategoria:</label>
+                                <select name="category" class="form-control">
+                                    <option value="party" selected>Zabawa</option>
+                                    <option value="ceremony">Ceremonia</option>
+                                    <option value="reception">Przyjęcie</option>
+                                    <option value="family">Rodzina</option>
+                                    <option value="friends">Przyjaciele</option>
+                                    <option value="preparations">Przygotowania</option>
+                                    <option value="other">Inne</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Komentarz do wszystkich zdjęć (opcjonalnie):</label>
+                                <textarea name="description" class="form-control" rows="2" placeholder="np. Najlepsze momenty z zabawy tanecznej..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Przycisk wysyłania -->
+                <div class="upload-controls mt-4" id="upload-controls" style="display: none;">
+                    <button type="submit" class="btn btn-custom-primary btn-lg btn-block" id="upload-button">
+                        <i class="fas fa-upload"></i> 
+                        Prześlij <span id="file-count-text">zdjęcia</span>
+                    </button>
+                </div>
+                
+                <!-- Progress bar -->
+                <div id="upload-progress" class="upload-progress" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="color: #5d4e37; font-weight: bold;">Przesyłanie zdjęć...</span>
+                        <span id="progress-percentage" style="color: #8b6f47;">0%</span>
+                    </div>
+                    <div style="background: #e9ecef; border-radius: 10px; height: 20px; overflow: hidden;">
+                        <div id="progress-bar" class="progress-bar-custom" style="width: 0%;"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9rem; color: #6b5b4f;">
+                        <span id="progress-text">Przygotowywanie...</span>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Wskazówki na dole -->
             <div class="card card-custom mt-4">
                 <div class="card-body">
-                    <h5 style="color: #5d4e37; margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Instrukcje:</h5>
-                    <ul style="color: #6b5b4f;">
-                        <li>Wybierz najlepsze zdjęcia z uroczystości</li>
-                        <li>Dodaj opisowy tytuł i krótki komentarz</li>
-                        <li>Wybierz odpowiednią kategorię</li>
-                        <li>Twoje zdjęcia pojawią się w galerii po zatwierdzeniu przez administratora</li>
-                        <li>Maksymalny rozmiar pliku: 10MB</li>
-                        <li>Akceptowane formaty: JPG, PNG, HEIC</li>
-                    </ul>
+                    <h6 style="color: #5d4e37; margin-bottom: 15px;">💡 Wskazówki:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul style="color: #6b5b4f; font-size: 0.9rem;">
+                                <li><strong>Wybierz wiele zdjęć naraz</strong> - trzymaj Ctrl/Cmd</li>
+                                <li><strong>Przeciągaj i upuszczaj</strong> zdjęcia w szarą strefę</li>
+                                <li><strong>Bez tytułów!</strong> - automatycznie nadamy nazwy</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul style="color: #6b5b4f; font-size: 0.9rem;">
+                                <li><strong>Maks. 10MB</strong> na jedno zdjęcie</li>
+                                <li><strong>Formaty:</strong> JPG, PNG, HEIC</li>
+                                <li><strong>Zdjęcia pojawią się</strong> po zatwierdzeniu</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('photo-files');
+    const photoPreview = document.getElementById('photo-preview');
+    const uploadControls = document.getElementById('upload-controls');
+    const fileCountBadge = document.getElementById('file-count');
+    const fileCountText = document.getElementById('file-count-text');
+    const uploadForm = document.getElementById('multi-upload-form');
+    
+    let selectedFiles = [];
+    
+    // Drag & Drop functionality
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+        if (files.length > 0) {
+            handleFiles(files);
+        }
+    });
+    
+    // Click to upload
+    dropZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', function() {
+        const files = Array.from(this.files);
+        if (files.length > 0) {
+            handleFiles(files);
+        }
+    });
+    
+    function handleFiles(files) {
+        // Sprawdź rozmiar plików
+        const validFiles = files.filter(file => {
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                alert(`⚠️ Plik "${file.name}" jest za duży (maksymalnie 10MB)`);
+                return false;
+            }
+            return true;
+        });
+        
+        selectedFiles = validFiles;
+        updateUI();
+        showPreview();
+    }
+    
+    function updateUI() {
+        const count = selectedFiles.length;
+        
+        if (count > 0) {
+            fileCountBadge.style.display = 'block';
+            fileCountBadge.textContent = count === 1 ? '1 zdjęcie' : `${count} zdjęć`;
+            
+            uploadControls.style.display = 'block';
+            fileCountText.textContent = count === 1 ? '1 zdjęcie' : `${count} zdjęć`;
+            
+            // Ukryj prompt, pokaż mniejszy wskaźnik
+            document.getElementById('upload-prompt').style.display = 'none';
+            
+        } else {
+            fileCountBadge.style.display = 'none';
+            uploadControls.style.display = 'none';
+            document.getElementById('upload-prompt').style.display = 'block';
+        }
+    }
+    
+    function showPreview() {
+        photoPreview.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'photo-preview-item';
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" class="photo-preview-img" alt="Podgląd">
+                    <div class="photo-preview-name">${file.name}</div>
+                    <button type="button" class="photo-remove-btn" onclick="removeFile(${index})">×</button>
+                `;
+                photoPreview.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Funkcja globalna do usuwania plików
+    window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        
+        // Zaktualizuj input file
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+        
+        updateUI();
+        showPreview();
+    };
+    
+    // Progress simulation during upload
+    uploadForm.addEventListener('submit', function(e) {
+        if (selectedFiles.length === 0) {
+            e.preventDefault();
+            alert('Proszę wybrać przynajmniej jedno zdjęcie!');
+            return;
+        }
+        
+        // Pokaż progress bar
+        document.getElementById('upload-progress').style.display = 'block';
+        document.getElementById('upload-button').disabled = true;
+        
+        // Symulacja postępu
+        let progress = 0;
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const progressPercentage = document.getElementById('progress-percentage');
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 95) progress = 95; // Nie dochodź do 100% przed końcem
+            
+            progressBar.style.width = progress + '%';
+            progressPercentage.textContent = Math.round(progress) + '%';
+            progressText.textContent = `Przesyłanie ${selectedFiles.length} zdjęć...`;
+        }, 300);
+        
+        // Zatrzymaj symulację po 2 sekundach (formularz się już wyśle)
+        setTimeout(() => {
+            clearInterval(interval);
+        }, 2000);
+    });
+    
+    // Rozwijanie/zwijanie opcjonalnych detali
+    document.getElementById('optional-details').addEventListener('show.bs.collapse', function () {
+        document.getElementById('details-chevron').style.transform = 'rotate(90deg)';
+    });
+    
+    document.getElementById('optional-details').addEventListener('hide.bs.collapse', function () {
+        document.getElementById('details-chevron').style.transform = 'rotate(0deg)';
+    });
+});
+</script>
 {% endblock %}

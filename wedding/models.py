@@ -65,6 +65,7 @@ class Table(models.Model):
         verbose_name = "Stół"
         verbose_name_plural = "Stoły"
         ordering = ['number']
+    
     def __str__(self):
         return f"Stół {self.number}" + (f" - {self.name}" if self.name else "")
     
@@ -81,6 +82,7 @@ class Table(models.Model):
         if self.capacity > 0:
             return int((self.guests_count / self.capacity) * 100)
         return 0
+
 class Photo(models.Model):
     CATEGORY_CHOICES = [
         ('ceremony', 'Ceremonia'),
@@ -96,7 +98,24 @@ class Photo(models.Model):
     description = models.TextField(blank=True, verbose_name="Opis")
     image = models.ImageField(upload_to='photos/%Y/%m/', verbose_name="Zdjęcie")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other', verbose_name="Kategoria")
-    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Przesłane przez")
+    
+    # Zmieniamy na opcjonalne - dla anonimowych użytkowników
+    uploaded_by = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        verbose_name="Przesłane przez"
+    )
+    
+    # Dodajemy pole dla nazwy anonimowego użytkownika
+    uploader_name = models.CharField(
+        max_length=100, 
+        blank=True, 
+        verbose_name="Imię przesyłającego",
+        help_text="Dla gości bez konta"
+    )
+    
     approved = models.BooleanField(default=False, verbose_name="Zatwierdzone")
     featured = models.BooleanField(default=False, verbose_name="Wyróżnione")
     upload_date = models.DateTimeField(auto_now_add=True)
@@ -108,6 +127,16 @@ class Photo(models.Model):
     
     def __str__(self):
         return self.title
+    
+    @property
+    def uploader_display_name(self):
+        """Zwraca nazwę osoby przesyłającej - użytkownika lub anonimową"""
+        if self.uploaded_by:
+            return f"{self.uploaded_by.first_name} {self.uploaded_by.last_name}".strip()
+        elif self.uploader_name:
+            return self.uploader_name
+        else:
+            return "Anonimowy gość"
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

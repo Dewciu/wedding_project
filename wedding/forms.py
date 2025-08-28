@@ -1,76 +1,100 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column, Field
-from .models import Photo, Guest
+from crispy_forms.layout import Layout, Submit, Row, Column, Field, HTML
+from .models import Photo
 
-class PhotoUploadForm(forms.ModelForm):
-    class Meta:
-        model = Photo
-        fields = ['title', 'description', 'image', 'category']
-        widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'Tytuł zdjęcia...'}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Opisz zdjęcie...'}),
-        }
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+class MultiPhotoUploadForm(forms.Form):
+    # Pole na wiele plików
+    photos = MultipleFileField(
+        widget=MultipleFileInput(attrs={
+            'accept': 'image/*',
+            'class': 'form-control-file',
+            'id': 'photo-files'
+        }),
+        help_text="Wybierz wiele zdjęć naraz",
+        required=True
+    )
+    
+    # Opcjonalne pola
+    uploader_name = forms.CharField(
+        max_length=100, 
+        required=False,
+        label="Twoje imię (opcjonalne)",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'np. Anna i Tomek', 
+            'class': 'form-control'
+        })
+    )
+    
+    category = forms.ChoiceField(
+        choices=Photo.CATEGORY_CHOICES,
+        required=False,
+        initial='party',
+        label="Kategoria (opcjonalnie)",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 2, 
+            'placeholder': 'Opcjonalny komentarz do wszystkich zdjęć...', 
+            'class': 'form-control'
+        }),
+        required=False,
+        label="Komentarz (opcjonalnie)"
+    )
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        self.helper.form_id = 'multi-upload-form'
         self.helper.layout = Layout(
-            Field('title', css_class='form-control-lg'),
-            Field('description'),
+            HTML('<div class="upload-section">'),
+            HTML('<h5 style="color: #5d4e37; margin-bottom: 15px;"><i class="fas fa-images"></i> Wybierz zdjęcia:</h5>'),
+            Field('photos'),
+            HTML('<div id="photo-preview" class="mt-3"></div>'),
+            HTML('</div>'),
+            
+            HTML('<div class="details-section mt-4" style="background: #f8f5f0; padding: 20px; border-radius: 10px;">'),
+            HTML('<h6 style="color: #5d4e37; margin-bottom: 15px;"><i class="fas fa-edit"></i> Opcjonalne detale:</h6>'),
+            Field('uploader_name'),
             Field('category'),
-            Field('image', css_class='form-control-file'),
-            Submit('submit', 'Prześlij zdjęcie', css_class='btn btn-primary btn-lg btn-block')
+            Field('description'),
+            HTML('</div>'),
+            
+            HTML('<div class="upload-controls mt-4">'),
+            Submit('submit', 'Prześlij wszystkie zdjęcia', 
+                   css_class='btn btn-custom-primary btn-lg btn-block', 
+                   id='upload-button'),
+            HTML('<div id="upload-progress" class="mt-3" style="display: none;"></div>'),
+            HTML('</div>')
         )
-
-class GuestRegistrationForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True, label="Imię")
-    last_name = forms.CharField(max_length=30, required=True, label="Nazwisko")
-    email = forms.EmailField(required=True, label="Email")
-    phone_number = forms.CharField(max_length=15, required=False, label="Telefon")
-    
-    class Meta:
-        model = User
-        fields = ('first_name', 'last_name', 'email', 'username', 'password1', 'password2')
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Row(
-                Column('first_name', css_class='form-group col-md-6 mb-0'),
-                Column('last_name', css_class='form-group col-md-6 mb-0'),
-            ),
-            Field('email'),
-            Field('phone_number'),
-            Field('username'),
-            Field('password1'),
-            Field('password2'),
-            Submit('submit', 'Zarejestruj się', css_class='btn btn-success btn-lg btn-block')
-        )
-    
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
-        if commit:
-            user.save()
-            guest = Guest.objects.create(
-                user=user,
-                phone_number=self.cleaned_data['phone_number']
-            )
-        return user
 
 class TableSearchForm(forms.Form):
     search_query = forms.CharField(
         max_length=100,
         widget=forms.TextInput(attrs={
-            'placeholder': 'Wpisz swoje imię i nazwisko...',
+            'placeholder': 'Wpisz swoje imię i/lub nazwisko...',
             'class': 'form-control form-control-lg'
         }),
         label="",
         required=False
     )
+
+# Usuwamy GuestRegistrationForm ponieważ nie potrzebujemy już rejestracji
