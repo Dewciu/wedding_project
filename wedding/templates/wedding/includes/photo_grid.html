@@ -2,13 +2,21 @@
     {% for photo in photos %}
     <div class="photo-item" data-toggle="modal" data-target="#photoModal{{ photo.id }}">
         {% if photo.image %}
-            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+            {% with thumbnail_url=photo.get_thumbnail_url %}
+                {% if thumbnail_url %}
+                    <img src="{{ thumbnail_url }}" alt="{{ photo.title }}" loading="lazy"
+                         onerror="this.onerror=null; this.src='{{ photo.image.url }}';">
+                {% else %}
+                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy"
+                         onerror="this.onerror=null; this.src='/static/wedding/images/no-photo.jpg';">
+                {% endif %}
+            {% endwith %}
         {% else %}
             <div class="photo-placeholder">{{ photo.title }}</div>
         {% endif %}
         <div class="photo-overlay">
             <h6>{{ photo.title }}</h6>
-            <small>{{ photo.uploaded_by.first_name }}</small>
+            <small>{{ photo.uploader_display_name }}</small>
         </div>
     </div>
     {% endfor %}

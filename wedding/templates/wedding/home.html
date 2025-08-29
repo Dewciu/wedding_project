@@ -25,7 +25,19 @@
     <div class="photo-grid">
         {% for photo in featured_photos %}
         <div class="photo-item" data-toggle="modal" data-target="#photoModal{{ photo.id }}">
-            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+            {% if photo.image %}
+                {% with thumbnail_url=photo.get_thumbnail_url %}
+                    {% if thumbnail_url %}
+                        <img src="{{ thumbnail_url }}" alt="{{ photo.title }}" loading="lazy"
+                             onerror="this.onerror=null; this.src='{{ photo.image.url }}';">
+                    {% else %}
+                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy"
+                             onerror="this.onerror=null; this.src='/static/wedding/images/no-photo.jpg';">
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                <img src="/static/wedding/images/no-photo.jpg" alt="Brak zdjęcia" loading="lazy">
+            {% endif %}
             <div class="photo-overlay">
                 <h5>{{ photo.title }}</h5>
                 <small>{{ photo.uploader_display_name }}</small>
@@ -43,7 +55,25 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid">
+                        {% if photo.image %}
+                            {% with full_url=photo.get_full_size_url optimized_url=photo.get_optimized_url %}
+                                {% if full_url %}
+                                    <img src="{{ full_url }}" alt="{{ photo.title }}" class="img-fluid"
+                                         onerror="this.onerror=null; this.src='{% if optimized_url %}{{ optimized_url }}{% else %}{{ photo.image.url }}{% endif %}';">
+                                {% elif optimized_url %}
+                                    <img src="{{ optimized_url }}" alt="{{ photo.title }}" class="img-fluid"
+                                         onerror="this.onerror=null; this.src='{{ photo.image.url }}';">
+                                {% else %}
+                                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid"
+                                         onerror="this.onerror=null; this.src='/static/wedding/images/no-photo.jpg';">
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <div class="text-center p-4">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="mt-3 text-muted">Zdjęcie nie jest dostępne</p>
+                            </div>
+                        {% endif %}
                         {% if photo.description %}
                         <p class="mt-3">{{ photo.description }}</p>
                         {% endif %}
@@ -92,7 +122,25 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid">
+                        {% if photo.image %}
+                            {% with full_url=photo.get_full_size_url optimized_url=photo.get_optimized_url %}
+                                {% if full_url %}
+                                    <img src="{{ full_url }}" alt="{{ photo.title }}" class="img-fluid"
+                                         onerror="this.onerror=null; this.src='{% if optimized_url %}{{ optimized_url }}{% else %}{{ photo.image.url }}{% endif %}';">
+                                {% elif optimized_url %}
+                                    <img src="{{ optimized_url }}" alt="{{ photo.title }}" class="img-fluid"
+                                         onerror="this.onerror=null; this.src='{{ photo.image.url }}';">
+                                {% else %}
+                                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid"
+                                         onerror="this.onerror=null; this.src='/static/wedding/images/no-photo.jpg';">
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <div class="text-center p-4">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="mt-3 text-muted">Zdjęcie nie jest dostępne</p>
+                            </div>
+                        {% endif %}
                         {% if photo.description %}
                         <p class="mt-3">{{ photo.description }}</p>
                         {% endif %}

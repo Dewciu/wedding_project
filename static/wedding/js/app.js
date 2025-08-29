@@ -112,8 +112,11 @@ $(document).ready(function() {
                         if (data.photos.length > 0) {
                             data.photos.forEach(function(photo) {
                                 const photoHtml = `
-                                    <div class="photo-item">
-                                        <img src="${photo.image_url}" alt="${photo.title}" loading="lazy">
+                                    <div class="photo-item" data-toggle="modal" data-target="#photoModal${photo.id}">
+                                        <img src="${photo.image_url || photo.full_image_url || '/static/wedding/images/no-photo.jpg'}" 
+                                             alt="${photo.title}" 
+                                             loading="lazy"
+                                             onerror="this.onerror=null; this.src='${photo.full_image_url || '/static/wedding/images/no-photo.jpg'}';">
                                         <div class="photo-overlay">
                                             <h6>${photo.title}</h6>
                                             <small>${photo.uploaded_by}</small>

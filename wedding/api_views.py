@@ -24,9 +24,10 @@ def api_photos(request):
                 'id': photo.id,
                 'title': photo.title,
                 'description': photo.description,
-                'image_url': photo.image.url if photo.image else None,
+                'image_url': photo.get_thumbnail_url() or photo.image.url if photo.image else None,
+                'full_image_url': photo.get_optimized_url() or photo.image.url if photo.image else None,
                 'category': photo.category,
-                'uploaded_by': photo.uploaded_by.get_full_name(),
+                'uploaded_by': photo.uploader_display_name,
                 'upload_date': photo.upload_date.isoformat(),
             }
             for photo in page_obj
