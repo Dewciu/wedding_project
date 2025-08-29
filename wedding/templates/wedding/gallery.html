@@ -36,14 +36,31 @@
     <div class="photo-grid">
         {% for photo in photos %}
         <div class="photo-item" data-toggle="modal" data-target="#photoModal{{ photo.id }}">
-            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+            <!-- NAPRAWIONY URL ZDJĘCIA - obsługuje zarówno Cloudinary jak i ImageField -->
+            {% if photo.image %}
+                {% with thumbnail_url=photo.get_thumbnail_url %}
+                    {% if thumbnail_url %}
+                        <img src="{{ thumbnail_url }}" 
+                             alt="{{ photo.title }}" 
+                             loading="lazy"
+                             onerror="this.onerror=null; this.src='{{ photo.image.url }}';">
+                    {% else %}
+                        <img src="{{ photo.image.url }}" 
+                             alt="{{ photo.title }}" 
+                             loading="lazy"
+                             onerror="this.onerror=null; this.src='/static/wedding/images/no-photo.jpg';">
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                <img src="/static/wedding/images/no-photo.jpg" alt="Brak zdjęcia" loading="lazy">
+            {% endif %}
             <div class="photo-overlay">
-                <h6>{{ photo.title }}</h6>
-                <small>{{ photo.uploaded_by.first_name }} {{ photo.uploaded_by.last_name }}</small>
+                <h5>{{ photo.title }}</h5>
+                <small>{{ photo.uploader_display_name }}</small>
             </div>
         </div>
         
-        <!-- Photo Modal -->
+        <!-- Modal dla każdego zdjęcia -->
         <div class="modal fade" id="photoModal{{ photo.id }}" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -54,14 +71,74 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="img-fluid">
-                        {% if photo.description %}
-                        <p class="mt-3">{{ photo.description }}</p>
+                        <!-- NAPRAWIONY URL W MODALU - pełny rozmiar -->
+                        {% if photo.image %}
+                            {% with full_url=photo.get_full_size_url optimized_url=photo.get_optimized_url %}
+                                {% if full_url %}
+                                    <img src="{{ full_url }}" 
+                                         alt="{{ photo.title }}" 
+                                         class="img-fluid"
+                                         style="max-height: 80vh; width: auto; border-radius: 8px;"
+                                         onerror="this.onerror=null; this.src='{% if optimized_url %}{{ optimized_url }}{% else %}{{ photo.image.url }}{% endif %}';">
+                                {% elif optimized_url %}
+                                    <img src="{{ optimized_url }}" 
+                                         alt="{{ photo.title }}" 
+                                         class="img-fluid"
+                                         style="max-height: 80vh; width: auto; border-radius: 8px;"
+                                         onerror="this.onerror=null; this.src='{{ photo.image.url }}';">
+                                {% else %}
+                                    <img src="{{ photo.image.url }}" 
+                                         alt="{{ photo.title }}" 
+                                         class="img-fluid"
+                                         style="max-height: 80vh; width: auto; border-radius: 8px;"
+                                         onerror="this.onerror=null; this.src='/static/wedding/images/no-photo.jpg';">
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <div class="text-center p-4" style="background: #f8f5f0; border-radius: 10px;">
+                                <i class="fas fa-image fa-3x" style="color: #d4c4a8;"></i>
+                                <p class="mt-3 text-muted">Zdjęcie nie jest dostępne</p>
+                            </div>
                         {% endif %}
-                        <p class="text-muted">
-                            Przesłane przez: {{ photo.uploaded_by.first_name }} {{ photo.uploaded_by.last_name }}<br>
-                            {{ photo.upload_date|date:"j F Y, H:i" }}
-                        </p>
+                        
+                        {% if photo.description %}
+                        <p class="mt-3" style="font-style: italic;">{{ photo.description }}</p>
+                        {% endif %}
+                        
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="row text-center">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> {{ photo.uploader_display_name }}
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ photo.upload_date|date:"j F Y, H:i" }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% if photo.category %}
+                            <div class="mt-2">
+                                <span class="badge badge-secondary">
+                                    {{ photo.get_category_display }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Zamknij
+                        </button>
+                        <!-- Opcjonalny przycisk pobierania -->
+                        {% if photo.image %}
+                        <a href="{% if photo.get_full_size_url %}{{ photo.get_full_size_url }}{% else %}{{ photo.image.url }}{% endif %}" 
+                           target="_blank" 
+                           class="btn btn-custom-primary">
+                            <i class="fas fa-download"></i> Pobierz
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -71,11 +148,18 @@
     
     <!-- Pagination -->
     {% if photos.has_other_pages %}
-    <nav aria-label="Nawigacja stron">
-        <ul class="pagination justify-content-center mt-4">
+    <nav aria-label="Photo pagination" class="mt-5">
+        <ul class="pagination justify-content-center">
             {% if photos.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ photos.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}">Poprzednia</a>
+                    <a class="page-link" href="?page=1{% if current_category %}&category={{ current_category }}{% endif %}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ photos.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
                 </li>
             {% endif %}
             
@@ -93,7 +177,14 @@
             
             {% if photos.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ photos.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}">Następna</a>
+                    <a class="page-link" href="?page={{ photos.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ photos.paginator.num_pages }}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
                 </li>
             {% endif %}
         </ul>
@@ -101,12 +192,94 @@
     {% endif %}
     
     {% else %}
+    <!-- Brak zdjęć -->
     <div class="text-center mt-5">
-        <h4 style="color: #7a6b5d;">Brak zdjęć w tej kategorii</h4>
-        {% if user.is_authenticated %}
-        <p>Bądź pierwszy! <a href="{% url 'wedding:upload' %}" class="btn btn-custom-primary">Prześlij zdjęcie</a></p>
-        {% endif %}
+        <div style="background: #f8f5f0; padding: 50px 30px; border-radius: 15px; border: 1px solid #d4c4a8;">
+            {% if current_category %}
+                <i class="fas fa-search fa-3x mb-4" style="color: #8b6f47;"></i>
+                <h4 style="color: #5d4e37; margin-bottom: 20px;">
+                    Brak zdjęć w kategorii "{{ current_category|title }}"
+                </h4>
+                <p style="color: #6b5b4f; margin-bottom: 25px;">
+                    Spróbuj wybrać inną kategorię lub przeglądaj wszystkie zdjęcia.
+                </p>
+                <a href="{% url 'wedding:gallery' %}" class="btn btn-custom-primary mr-3">
+                    <i class="fas fa-images"></i> Zobacz Wszystkie
+                </a>
+            {% else %}
+                <i class="fas fa-camera fa-3x mb-4" style="color: #8b6f47;"></i>
+                <h4 style="color: #5d4e37; margin-bottom: 20px;">
+                    Galeria jest jeszcze pusta
+                </h4>
+                <p style="color: #6b5b4f; margin-bottom: 25px;">
+                    Bądź pierwszą osobą, która podzieli się wspomnieniami z tego pięknego dnia!
+                </p>
+            {% endif %}
+            
+            <a href="{% url 'wedding:upload' %}" class="btn btn-custom-primary btn-lg">
+                <i class="fas fa-plus"></i> Prześlij Pierwsze Zdjęcie
+            </a>
+        </div>
     </div>
     {% endif %}
+    
+    <!-- Loading indicator for infinite scroll (if implemented) -->
+    <div class="text-center mt-4 loading-indicator" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Ładowanie więcej zdjęć...</span>
+        </div>
+    </div>
 </div>
+
+<!-- Optional: Add some CSS for better modal image display -->
+<style>
+.modal-body img {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 8px;
+}
+
+.photo-item img {
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover img {
+    transform: scale(1.05);
+}
+
+.page-link {
+    color: #8b6f47;
+    border-color: #d4c4a8;
+}
+
+.page-link:hover {
+    color: #5d4e37;
+    background-color: #f5f0e8;
+    border-color: #8b6f47;
+}
+
+.page-item.active .page-link {
+    background-color: #8b6f47;
+    border-color: #8b6f47;
+}
+
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .modal-body img {
+        max-height: 60vh;
+    }
+    
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        margin: 2px;
+        font-size: 0.85rem;
+    }
+}
+</style>
 {% endblock %}

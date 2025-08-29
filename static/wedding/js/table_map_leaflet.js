@@ -681,37 +681,33 @@ class WeddingTableMap {
             return;
         }
         
-        let searchTimeout;
+        // USUNIĘTE: Real-time search as user types - teraz tylko po kliknięciu/submit
         
-        // Real-time search as user types
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            
-            // Clear previous timeout
-            clearTimeout(searchTimeout);
-            
-            // Clear highlights if query is too short
-            if (query.length < 2) {
-                this.clearSearchHighlights();
-                return;
-            }
-            
-            // Debounced search
-            searchTimeout = setTimeout(() => {
-                this.performSearch(query);
-            }, 300);
-        });
-        
-        // Handle form submission
+        // Handle form submission - GŁÓWNY SPOSÓB WYSZUKIWANIA
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const query = searchInput.value.trim();
             if (query.length >= 2) {
                 this.performSearch(query);
+            } else {
+                this.showNotification('Wpisz przynajmniej 2 znaki imienia i nazwiska', 'info');
             }
         });
         
-        console.log('✅ Search functionality setup complete');
+        // Dodaj obsługę dla przycisku Enter
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query.length >= 2) {
+                    this.performSearch(query);
+                } else {
+                    this.showNotification('Wpisz przynajmniej 2 znaki imienia i nazwiska', 'info');
+                }
+            }
+        });
+        
+        console.log('✅ Search functionality setup complete - search on submit only');
     }
 
     performSearch(query) {

@@ -1,6 +1,13 @@
+# wedding/models.py - Szybka poprawka konfliktu
+
 from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
+# Importy dla Cloudinary
+from django.conf import settings
+import cloudinary
+import cloudinary.uploader
+from cloudinary import CloudinaryImage
 
 class WeddingInfo(models.Model):
     bride_name = models.CharField(max_length=100, verbose_name="Imię Panny Młodej")
@@ -18,7 +25,12 @@ class WeddingInfo(models.Model):
         return f"{self.bride_name} & {self.groom_name}"
 
 class Guest(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # DODAŁEM related_name żeby uniknąć konfliktu
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='wedding_guest_profile'
+    )
     phone_number = models.CharField(max_length=15, blank=True, verbose_name="Numer telefonu")
     table_number = models.IntegerField(null=True, blank=True, verbose_name="Numer stołu")
     guest_type = models.CharField(max_length=50, blank=True, verbose_name="Typ gościa")
@@ -85,13 +97,13 @@ class Table(models.Model):
 
 class Photo(models.Model):
     CATEGORY_CHOICES = [
-        ('ceremony', 'Ceremonia'),
-        ('reception', 'Przyjęcie'),
-        ('party', 'Zabawa'),
-        ('preparations', 'Przygotowania'),
-        ('family', 'Rodzina'),
-        ('friends', 'Przyjaciele'),
-        ('other', 'Inne'),
+        ('ceremony', '💒 Ceremonia'),
+        ('reception', '🎉 Przyjęcie'),
+        ('party', '💃 Zabawa'),
+        ('preparations', '👗 Przygotowania'),
+        ('family', '👨‍👩‍👧‍👦 Rodzina'),
+        ('friends', '👥 Przyjaciele'),
+        ('other', '📷 Inne'),
     ]
     
     title = models.CharField(max_length=200, verbose_name="Tytuł")
@@ -99,12 +111,13 @@ class Photo(models.Model):
     image = models.ImageField(upload_to='photos/%Y/%m/', verbose_name="Zdjęcie")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other', verbose_name="Kategoria")
     
-    # Zmieniamy na opcjonalne - dla anonimowych użytkowników
+    # NAPRAWIONY: Dodałem related_name żeby uniknąć konfliktu z cloudinary.Photo
     uploaded_by = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
         null=True, 
         blank=True,
+        related_name='wedding_photos',  # <-- KLUCZOWA ZMIANA!
         verbose_name="Przesłane przez"
     )
     
@@ -138,55 +151,156 @@ class Photo(models.Model):
         else:
             return "Anonimowy gość"
     
+    def get_cloudinary_url(self, **kwargs):
+        """Generuje URL dla Cloudinary z opcjami transformacji"""
+        if not self.image:
+            return None
+            
+        # Sprawdź czy używamy Cloudinary
+        if not getattr(settings, 'USE_CLOUDINARY', False):
+            return self.image.url
+            
+        try:
+            # Napraw błędny URL (brakujący ukośnik)
+            image_url = str(self.image)
+            if 'https:/res.cloudinary.com' in image_url:
+                image_url = image_url.replace('https:/res.cloudinary.com', 'https://res.cloudinary.com')
+            
+            # Jeśli URL już zawiera transformacje Cloudinary, zwróć poprawiony URL
+            if 'cloudinary.com' in image_url:
+                # Wyciągnij public_id z URLa Cloudinary
+                # Format: https://res.cloudinary.com/cloud_name/image/upload/public_id
+                parts = image_url.split('/upload/')
+                if len(parts) > 1:
+                    public_id = parts[1].split('?')[0]  # Usuń query params jeśli są
+                    # Usuń rozszerzenie pliku
+                    public_id = public_id.rsplit('.', 1)[0] if '.' in public_id else public_id
+                else:
+                    # Fallback - użyj prostej metody
+                    public_id = image_url.split('/')[-1].rsplit('.', 1)[0]
+                
+                # Generuj URL z Cloudinary
+                cloudinary_image = CloudinaryImage(public_id)
+                return cloudinary_image.build_url(**kwargs)
+            else:
+                # Lokalny plik - użyj nazwy bez rozszerzenia
+                public_id = str(self.image).rsplit('.', 1)[0]
+                cloudinary_image = CloudinaryImage(public_id)
+                return cloudinary_image.build_url(**kwargs)
+            
+        except Exception as e:
+            print(f"Błąd przy generowaniu Cloudinary URL: {e}")
+            # Zwróć poprawiony podstawowy URL
+            fixed_url = str(self.image.url) if self.image else None
+            if fixed_url and 'https:/res.cloudinary.com' in fixed_url:
+                fixed_url = fixed_url.replace('https:/res.cloudinary.com', 'https://res.cloudinary.com')
+            return fixed_url
+    
+    def get_thumbnail_url(self):
+        """URL do miniaturki zdjęcia (300x300)"""
+        return self.get_cloudinary_url(
+            width=300,
+            height=300,
+            crop='fill',
+            quality='auto:good',
+            fetch_format='auto'
+        )
+    
+    def get_optimized_url(self):
+        """URL do zoptymalizowanego zdjęcia (800px szerokość)"""
+        return self.get_cloudinary_url(
+            width=800,
+            quality='auto:good',
+            fetch_format='auto'
+        )
+    
+    def get_full_size_url(self):
+        """URL do pełnego zdjęcia z optymalizacją"""
+        return self.get_cloudinary_url(
+            quality='auto:best',
+            fetch_format='auto'
+        )
+    
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         
+        # Optymalizacja zdjęć - zmniejsz jeśli za duże
         if self.image:
-            img = Image.open(self.image.path)
-            if img.height > 1200 or img.width > 1200:
-                output_size = (1200, 1200)
-                img.thumbnail(output_size)
-                img.save(self.image.path)
+            try:
+                img = Image.open(self.image.path)
+                if img.height > 1200 or img.width > 1200:
+                    output_size = (1200, 1200)
+                    img.thumbnail(output_size, Image.Resampling.LANCZOS)
+                    img.save(self.image.path, optimize=True, quality=85)
+            except Exception as e:
+                print(f"Błąd przy optymalizacji zdjęcia: {e}")
+    
+    # METODY DO OBSŁUGI URL-I CLOUDINARY (FALLBACK)
+    def get_cloudinary_url_simple(self, size='medium'):
+        """Zwraca URL do zdjęcia w chmurze Cloudinary w podanym rozmiarze."""
+        if self.image:
+            try:
+                # Napraw błędny URL jeśli potrzeba
+                image_url = str(self.image.url)
+                if 'https:/res.cloudinary.com' in image_url:
+                    return image_url.replace('https:/res.cloudinary.com', 'https://res.cloudinary.com')
+                
+                cloudinary_image = CloudinaryImage(self.image.name)
+                return cloudinary_image.build_url(width=size, height=size, crop="limit")
+            except Exception as e:
+                print(f"Błąd przy generowaniu URL Cloudinary: {e}")
+                # Zwróć poprawiony podstawowy URL
+                if self.image.url and 'https:/res.cloudinary.com' in str(self.image.url):
+                    return str(self.image.url).replace('https:/res.cloudinary.com', 'https://res.cloudinary.com')
+        return ""
+    
+    def delete(self, *args, **kwargs):
+        """Nadpisana metoda usuwania, aby także usuwać zdjęcia z Cloudinary."""
+        if self.image:
+            try:
+                # Usuń zdjęcie z Cloudinary
+                cloudinary.uploader.destroy(self.image.name, invalidate=True)
+            except Exception as e:
+                print(f"Błąd przy usuwaniu zdjęcia z Cloudinary: {e}")
+        super().delete(*args, **kwargs)
 
 class ScheduleEvent(models.Model):
     title = models.CharField(max_length=200, verbose_name="Tytuł")
     description = models.TextField(blank=True, verbose_name="Opis")
-    start_time = models.TimeField(verbose_name="Godzina rozpoczęcia")
-    end_time = models.TimeField(null=True, blank=True, verbose_name="Godzina zakończenia")
+    start_time = models.TimeField(verbose_name="Czas rozpoczęcia")
+    end_time = models.TimeField(null=True, blank=True, verbose_name="Czas zakończenia")
     location = models.CharField(max_length=200, blank=True, verbose_name="Miejsce")
     order = models.IntegerField(default=0, verbose_name="Kolejność")
     
     class Meta:
+        ordering = ['order', 'start_time']
         verbose_name = "Wydarzenie"
         verbose_name_plural = "Wydarzenia"
-        ordering = ['order', 'start_time']
     
     def __str__(self):
         return f"{self.start_time.strftime('%H:%M')} - {self.title}"
 
 class MenuItem(models.Model):
     COURSE_CHOICES = [
-        ('welcome', 'Koktajl powitalny'),
-        ('appetizer', 'Przystawka'),
-        ('soup', 'Zupa'),
-        ('main', 'Danie główne'),
-        ('dessert', 'Deser'),
-        ('drinks', 'Napoje'),
-        ('other', 'Inne'),
+        ('appetizer', '🥗 Przystawka'),
+        ('soup', '🍲 Zupa'), 
+        ('main', '🍖 Danie główne'),
+        ('dessert', '🍰 Deser'),
+        ('drink', '🥤 Napój'),
     ]
     
     name = models.CharField(max_length=200, verbose_name="Nazwa")
-    description = models.TextField(verbose_name="Opis")
-    course = models.CharField(max_length=20, choices=COURSE_CHOICES, verbose_name="Rodzaj")
-    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Cena")
+    description = models.TextField(blank=True, verbose_name="Opis")
+    course = models.CharField(max_length=20, choices=COURSE_CHOICES, verbose_name="Kategoria")
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, verbose_name="Cena")
     allergens = models.CharField(max_length=200, blank=True, verbose_name="Alergeny")
     vegetarian = models.BooleanField(default=False, verbose_name="Wegetariańskie")
     order = models.IntegerField(default=0, verbose_name="Kolejność")
     
     class Meta:
+        ordering = ['course', 'order', 'name']
         verbose_name = "Pozycja Menu"
-        verbose_name_plural = "Menu"
-        ordering = ['course', 'order']
+        verbose_name_plural = "Pozycje Menu"
     
     def __str__(self):
         return self.name

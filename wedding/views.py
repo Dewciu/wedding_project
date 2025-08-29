@@ -269,27 +269,39 @@ def menu(request):
 # AJAX endpoint for table search - również naprawione
 @require_http_methods(["GET"])
 def ajax_table_search(request):
-    """Naprawione AJAX wyszukiwanie stolika"""
+    """Naprawione AJAX wyszukiwanie stolika - szuka po imieniu I nazwisku"""
     query = request.GET.get('q', '').strip()
     results = {'found': False}
     
     print(f"AJAX search for: '{query}'")
     
     if len(query) >= 2:
-        # Te same ulepszenia co w głównym wyszukiwaniu
+        # Lepsze wyszukiwanie - szuka pełnego imienia i nazwiska
         guests = Guest.objects.annotate(
             full_name_concat=Concat('user__first_name', Value(' '), 'user__last_name')
         ).filter(
+            # Szuka po połączeniu imienia i nazwiska (główne kryterium)
+            Q(full_name_concat__icontains=query) |
+            # Lub po imieniu jeśli wpisano tylko imię
             Q(user__first_name__icontains=query) |
+            # Lub po nazwisku jeśli wpisano tylko nazwisko
             Q(user__last_name__icontains=query) |
-            Q(user__username__icontains=query) |
-            Q(full_name_concat__icontains=query)
+            # Lub po username jako fallback
+            Q(user__username__icontains=query)
         ).select_related('user')
         
         print(f"AJAX found {guests.count()} guests")
         
         if guests.exists():
-            guest = guests.first()
+            # Priorytet dla dokładnych dopasowań pełnego imienia i nazwiska
+            exact_match = guests.filter(full_name_concat__iexact=query).first()
+            if exact_match:
+                guest = exact_match
+                print(f"AJAX exact match: {guest.full_name}")
+            else:
+                guest = guests.first()
+                print(f"AJAX partial match: {guest.full_name}")
+            
             results['found'] = True
             results['guest_name'] = guest.full_name
             results['table_number'] = guest.table_number or 'Nie przypisano'

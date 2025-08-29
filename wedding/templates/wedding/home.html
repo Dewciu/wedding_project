@@ -65,7 +65,13 @@
         {% for photo in recent_photos %}
         <div class="photo-item" data-toggle="modal" data-target="#recentPhotoModal{{ photo.id }}">
             {% if photo.image %}
-                <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+                {% with thumbnail_url=photo.get_thumbnail_url %}
+                    {% if thumbnail_url %}
+                        <img src="{{ thumbnail_url }}" alt="{{ photo.title }}" loading="lazy">
+                    {% else %}
+                        <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+                    {% endif %}
+                {% endwith %}
             {% else %}
                 <div class="photo-placeholder">{{ photo.title }}</div>
             {% endif %}
