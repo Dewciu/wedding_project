@@ -197,41 +197,46 @@ class Photo(models.Model):
             return fixed_url
     
     def get_thumbnail_url(self):
-        """URL do miniaturki zdjęcia (300x300)"""
+        """URL do miniaturki zdjęcia w bardzo wysokiej jakości (800x800)"""
         return self.get_cloudinary_url(
-            width=300,
-            height=300,
+            width=800,
+            height=800,
             crop='fill',
-            quality='auto:good',
-            fetch_format='auto'
+            quality='auto:best',
+            fetch_format='auto',
+            dpr='auto'  # Automatyczne dostosowanie do gęstości pikseli
         )
     
     def get_optimized_url(self):
-        """URL do zoptymalizowanego zdjęcia (800px szerokość)"""
+        """URL do zoptymalizowanego zdjęcia w bardzo wysokiej jakości (1800px szerokość)"""
         return self.get_cloudinary_url(
-            width=800,
-            quality='auto:good',
-            fetch_format='auto'
+            width=1800,
+            quality='auto:best',
+            fetch_format='auto',
+            dpr='auto'  # Automatyczne dostosowanie do gęstości pikseli
         )
     
     def get_full_size_url(self):
-        """URL do pełnego zdjęcia z optymalizacją"""
+        """URL do pełnego zdjęcia w najwyższej jakości"""
         return self.get_cloudinary_url(
             quality='auto:best',
-            fetch_format='auto'
+            fetch_format='auto',
+            dpr='auto'  # Automatyczne dostosowanie do gęstości pikseli
         )
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         
-        # Optymalizacja zdjęć - zmniejsz jeśli za duże
-        if self.image:
+        # Optymalizacja zdjęć tylko dla lokalnego środowiska - dla Cloudinary ta optymalizacja jest niepotrzebna
+        if self.image and not getattr(settings, 'USE_CLOUDINARY', False):
             try:
                 img = Image.open(self.image.path)
-                if img.height > 1200 or img.width > 1200:
-                    output_size = (1200, 1200)
+                if img.height > 2400 or img.width > 2400:
+                    # Zwiększamy maksymalny rozmiar dla lepszej jakości
+                    output_size = (2400, 2400)
                     img.thumbnail(output_size, Image.Resampling.LANCZOS)
-                    img.save(self.image.path, optimize=True, quality=85)
+                    # Zwiększamy jakość do 95%
+                    img.save(self.image.path, optimize=True, quality=95)
             except Exception as e:
                 print(f"Błąd przy optymalizacji zdjęcia: {e}")
     

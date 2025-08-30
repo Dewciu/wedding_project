@@ -38,9 +38,9 @@
         <div class="photo-item" data-toggle="modal" data-target="#photoModal{{ photo.id }}">
             <!-- NAPRAWIONY URL ZDJĘCIA - obsługuje zarówno Cloudinary jak i ImageField -->
             {% if photo.image %}
-                {% with thumbnail_url=photo.get_thumbnail_url %}
-                    {% if thumbnail_url %}
-                        <img src="{{ thumbnail_url }}" 
+                {% with optimized_url=photo.get_optimized_url %}
+                    {% if optimized_url %}
+                        <img src="{{ optimized_url }}" 
                              alt="{{ photo.title }}" 
                              loading="lazy"
                              onerror="this.onerror=null; this.src='{{ photo.image.url }}';">

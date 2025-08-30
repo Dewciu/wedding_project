@@ -145,8 +145,13 @@ if USE_CLOUDINARY:
             'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'heic'
         ],
         
-        # Domyślne transformacje dla wszystkich zdjęć
+        # Domyślne transformacje dla wszystkich zdjęć - NAJWYŻSZA JAKOŚĆ
         'STATICFILES_MANIFEST_ROOT': BASE_DIR / 'staticfiles',
+        'DEFAULT_FILE_STORAGE_OPTIONS': {
+            'quality': 'auto:best',
+            'fetch_format': 'auto',
+            'dpr': 'auto'
+        }
     }
     
     # Cloudinary URLs - nie ustawiamy MEDIA_URL dla Cloudinary

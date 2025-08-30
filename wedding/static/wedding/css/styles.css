@@ -232,6 +232,24 @@ body {
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
+    /* POPRAWIONE - najlepsze ustawienia dla jakości obrazów */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: auto; /* Najlepsza jakość */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* Antyaliasing dla lepszej jakości */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Zapobieganie rozmyciu podczas skalowania */
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+}
+
+.photo-item img[loading="lazy"] {
+    /* Zapewnienie smooth loading dla dużych obrazów */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .photo-item:hover img {
@@ -541,4 +559,33 @@ body {
         padding: 12px 25px;
         font-size: 1rem;
     }
+}
+
+/* Dodatkowe style dla wysokiej jakości obrazów */
+.photo-item img[loading="lazy"] {
+    /* Zapewnienie smooth loading dla dużych obrazów */
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Poprawki dla modal - zdjęcia w NAJWYŻSZEJ jakości */
+.modal-body img {
+    image-rendering: auto; /* Najlepsza jakość */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    /* Dodatkowe poprawki dla najlepszej jakości w pełnym rozmiarze */
+    object-fit: contain;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Preload najważniejszych zdjęć dla lepszej wydajności */
+.photo-item:nth-child(-n+6) img {
+    content-visibility: auto;
+    contain-intrinsic-size: 280px 280px;
 }

@@ -87,9 +87,11 @@ class PhotoAdmin(admin.ModelAdmin):
     
     def image_preview(self, obj):
         if obj.image:
+            # Użyj wysokiej jakości thumbnail dla podglądu w adminie
+            thumbnail_url = obj.get_thumbnail_url() if hasattr(obj, 'get_thumbnail_url') else obj.image.url
             return format_html(
                 '<img src="{}" width="60" height="60" style="object-fit: cover; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />',
-                obj.image.url
+                thumbnail_url or obj.image.url
             )
         return "📷"
     image_preview.short_description = 'Podgląd'

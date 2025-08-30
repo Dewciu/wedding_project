@@ -21,7 +21,7 @@
         <!-- Header -->
         {% if wedding_info %}
         <header class="header">
-            <h1 class="couple-names">{{ wedding_info.bride_name }} & {{ wedding_info.groom_name }}</h1>
+            <h1 class="couple-names">{{ wedding_info.bride_name }} <br> & <br> {{ wedding_info.groom_name }} <br> </h1>
             <p class="wedding-date">{{ wedding_info.wedding_date|date:"j F Y" }} • {{ wedding_info.venue_name }}</p>
         </header>
         {% endif %}
