@@ -241,9 +241,9 @@ class WeddingTableMap {
         this.setupTableInteractions(table.number, labelMarker);
 
         // Add guest avatars if zoom level allows
-        if (table.guest_list && table.guest_list.length > 0) {
-            this.addGuestAvatars(table, coords, shape, size);
-        }
+        // if (table.guest_list && table.guest_list.length > 0) {
+        //     this.addGuestAvatars(table, coords, shape, size);
+        // }
     }
 
     setupTableInteractions(tableNumber, labelMarker) {
