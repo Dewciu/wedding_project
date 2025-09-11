@@ -1,4 +1,5 @@
-// Wedding Table Map - Fixed Responsive Version
+// Wedding Table Map - Leaflet Version
+
 class WeddingTableMap {
     constructor() {
         this.map = null;
@@ -15,11 +16,6 @@ class WeddingTableMap {
         this.mobileScale = 1.0; // Will be set in createMap()
         this.minGuestZoom = -0.5; // Will be adjusted in createMap()
         
-        console.log('🏗️ Initializing Wedding Table Map...', {
-            isMobile: this.isMobile,
-            isSmallMobile: this.isSmallMobile,
-            minGuestZoom: this.minGuestZoom
-        });
         this.init();
     }
 
@@ -38,11 +34,8 @@ class WeddingTableMap {
     }
 
     createMap() {
-        console.log('🗺️ Creating responsive Leaflet map...');
-        
         const isMobile = window.innerWidth <= 768;
         const isSmallMobile = window.innerWidth <= 480;
-        console.log('📱 Mobile device:', isMobile, 'Small mobile:', isSmallMobile);
         
         // Clear any existing map
         if (this.map) {
@@ -51,7 +44,7 @@ class WeddingTableMap {
 
         // Calculate responsive scaling factors
         this.mobileScale = isMobile ? (isSmallMobile ? 0.6 : 0.75) : 1.0;
-        this.minGuestZoom = isMobile ? -2 : -1; // Allow guests to be visible at default zoom levels
+        this.minGuestZoom = isMobile ? -3 : -2; // Lowered thresholds to make guests always visible
         
         this.map = L.map('wedding-map', {
             crs: L.CRS.Simple,
@@ -91,8 +84,6 @@ class WeddingTableMap {
         this.map.on('zoomend', () => {
             this.handleZoomChange();
         });
-
-        console.log('✅ Map created with scaled bounds:', bounds, 'Scale:', this.mobileScale, 'MinGuestZoom:', this.minGuestZoom);
     }
 
     addVenueBackground() {
@@ -133,13 +124,9 @@ class WeddingTableMap {
     }
 
     addTables() {
-        console.log('🪑 Adding tables with responsive positioning...');
-        
         const tables = window.weddingData?.tables || [];
-        console.log(`Found ${tables.length} tables`);
         
         if (tables.length === 0) {
-            console.warn('No tables data - adding test tables');
             this.addTestTables();
             return;
         }
@@ -147,9 +134,8 @@ class WeddingTableMap {
         tables.forEach(table => {
             try {
                 this.createResponsiveTableMarker(table);
-                console.log(`✅ Table ${table.number} added successfully`);
             } catch (error) {
-                console.error(`❌ Error creating table ${table.number}:`, error);
+                console.error(`Error creating table ${table.number}:`, error);
             }
         });
     }
@@ -343,8 +329,6 @@ class WeddingTableMap {
     }
 
     handleTableClick(table) {
-        console.log(`🖱️ Table ${table.number} clicked`);
-        
         this.clearHighlights();
         this.highlightTable(table.number);
         
@@ -418,35 +402,48 @@ class WeddingTableMap {
     }
 
     addGuestAvatars(table, coords, shape, size) {
-        if (!table.guest_list || table.guest_list.length === 0) return;
+        if (!table.guest_list || table.guest_list.length === 0) {
+            return;
+        }
 
         const guests = table.guest_list;
         const totalGuests = guests.length;
         
-        console.log(`👥 Adding ${totalGuests} guest avatars for table ${table.number}`);
-        
         // Use the passed coords directly - they are already correctly calculated and scaled
         const actualCenter = coords;
         
-        console.log(`🎯 Table ${table.number} center:`, actualCenter, 'shape:', shape, 'size:', size);
+        // Sort guests by chair_position if available, otherwise use array order
+        const sortedGuests = [...guests].sort((a, b) => {
+            const posA = a.chair_position || 0;
+            const posB = b.chair_position || 0;
+            
+            // If both have positions, sort by position
+            if (posA > 0 && posB > 0) {
+                return posA - posB;
+            }
+            // If only one has position, put positioned guests first
+            if (posA > 0) return -1;
+            if (posB > 0) return 1;
+            // If neither has position, maintain original order
+            return guests.indexOf(a) - guests.indexOf(b);
+        });
         
-        guests.forEach((guest, index) => {
+        sortedGuests.forEach((guest, sortedIndex) => {
             const isCurrent = this.currentGuestInfo && this.currentGuestInfo.id === guest.id;
             let avatarCoords;
+            
+            // Use chair_position if available, otherwise use sorted index
+            const effectivePosition = guest.chair_position || (sortedIndex + 1);
+            const positionIndex = effectivePosition - 1; // Convert to 0-based index
 
             if (shape === 'rectangular' || shape === 'square') {
-                avatarCoords = this.calculateRectangularAvatarPosition(actualCenter, size, index, totalGuests);
+                avatarCoords = this.calculateRectangularAvatarPosition(actualCenter, size, positionIndex, totalGuests);
             } else {
-                avatarCoords = this.calculateCircularAvatarPosition(actualCenter, index, totalGuests);
+                avatarCoords = this.calculateCircularAvatarPosition(actualCenter, positionIndex, totalGuests);
             }
 
             if (avatarCoords) {
-                const avatar = this.createGuestAvatar(guest, avatarCoords, isCurrent, table.number, index + 1);
-                if (avatar) {
-                    console.log(`✅ Created avatar for ${guest.full_name} at table ${table.number}`);
-                } else {
-                    console.log(`❌ Failed to create avatar for ${guest.full_name} at table ${table.number}`);
-                }
+                const avatar = this.createGuestAvatar(guest, avatarCoords, isCurrent, table.number, effectivePosition);
             }
         });
     }
@@ -462,14 +459,11 @@ class WeddingTableMap {
         const angle = (360 / total) * index - 90; // Start from top
         const radian = (angle * Math.PI) / 180;
         
-        console.log(`🔄 Calculating circular position for guest ${index}/${total}, center:`, center, 'radius:', radius, 'angle:', angle, 'scaled: radius:', scaledRadius);
-        
         const result = [
             center[0] + Math.sin(radian) * radius,
             center[1] + Math.cos(radian) * radius
         ];
         
-        console.log(`📍 Guest ${index} positioned at:`, result);
         return result;
     }
 
@@ -480,8 +474,6 @@ class WeddingTableMap {
         const [width, height] = size;
         
         let x, y;
-        
-        console.log(`📐 Calculating rectangular position for guest ${index}/${total}, center:`, center, 'size:', size, 'margin:', margin);
         
         if (width > height) {
             // Horizontal table (wider than tall) - guests at top and bottom edges
@@ -507,7 +499,6 @@ class WeddingTableMap {
             y = center[1] - margin; // Move left (negative X direction in Leaflet)
         }
         
-        console.log(`📍 Guest ${index} positioned at:`, [x, y]);
         return [x, y];
     }
 
@@ -515,13 +506,7 @@ class WeddingTableMap {
         const isMobile = window.innerWidth <= 768;
         const currentZoom = this.map ? this.map.getZoom() : 0;
         
-        console.log(`👤 Creating avatar for ${guest.full_name}, zoom: ${currentZoom}, minZoom: ${this.minGuestZoom}`);
-        
-        // Only hide guests at extremely low zoom levels to prevent total clutter
-        if (currentZoom < this.minGuestZoom - 1) {
-            console.log(`❌ Skipping avatar creation - zoom too low (${currentZoom} < ${this.minGuestZoom - 1})`);
-            return null;
-        }
+        // Guests are always visible now - no zoom restrictions
         
         // Responsive avatar size based on device and zoom - smaller for less clutter
         const baseSize = isCurrent ? 30 : 28; // Reduced from 36:32 to 28:24
@@ -532,17 +517,21 @@ class WeddingTableMap {
         const avatarMarker = L.marker(coords, {
             icon: L.divIcon({
                 className: 'guest-avatar-marker',
-                html: `<div class="guest-avatar ${isCurrent ? 'current-guest' : ''}" data-guest-id="${guest.id}" style="
-                    width: ${avatarSize}px; height: ${avatarSize}px;
-                    border-radius: 50%;
-                    background: linear-gradient(145deg, ${isCurrent ? '#d4a574, #b8935f' : '#8b6f47, #5d4e37'});
-                    border: 2px solid #f5f0e8;
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: ${avatarSize * 0.4}px; color: #f5f0e8; font-weight: bold;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                    cursor: pointer; user-select: none;
-                    transition: opacity 0.3s ease;
-                ">${guest.user ? guest.user.first_name.charAt(0).toUpperCase() : guest.full_name.charAt(0).toUpperCase()}</div>`,
+                html: `<div class="guest-avatar ${isCurrent ? 'current-guest' : ''}" 
+                    data-guest-id="${guest.id}" 
+                    data-table-number="${tableNumber}" 
+                    data-seat-number="${seatNumber}"
+                    style="
+                        width: ${avatarSize}px; height: ${avatarSize}px;
+                        border-radius: 50%;
+                        background: linear-gradient(145deg, ${isCurrent ? '#d4a574, #b8935f' : '#8b6f47, #5d4e37'});
+                        border: 2px solid #f5f0e8;
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: ${avatarSize * 0.4}px; color: #f5f0e8; font-weight: bold;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                        cursor: grab; user-select: none;
+                        transition: opacity 0.3s ease, transform 0.2s ease;
+                    ">${guest.user ? guest.user.first_name.charAt(0).toUpperCase() : guest.full_name.charAt(0).toUpperCase()}</div>`,
                 iconSize: [avatarSize, avatarSize],
                 iconAnchor: [avatarSize/2, avatarSize/2]
             }),
@@ -550,18 +539,13 @@ class WeddingTableMap {
             zIndexOffset: isCurrent ? 1000 : 100
         }).addTo(this.map);
 
-        // Mobile-friendly interaction
-        if (isMobile) {
-            avatarMarker.on('click', (e) => {
-                e.originalEvent?.stopPropagation();
-                this.showGuestModal(guest, tableNumber, seatNumber);
-            });
-        } else {
-            avatarMarker.on('click', (e) => {
-                e.originalEvent?.stopPropagation();
-                this.showGuestModal(guest, tableNumber, seatNumber);
-            });
+        // Click interaction for guest modal
+        avatarMarker.on('click', (e) => {
+            e.originalEvent?.stopPropagation();
+            this.showGuestModal(guest, tableNumber, seatNumber);
+        });
 
+        if (!isMobile) {
             avatarMarker.bindTooltip(`<strong>${guest.full_name}</strong><br>Stół ${tableNumber}, Miejsce ${seatNumber}`, {
                 direction: 'top',
                 offset: [0, -5]
@@ -577,107 +561,31 @@ class WeddingTableMap {
         return avatarMarker;
     }
 
-    createTablePopup(table) {
-        const currentGuest = this.currentGuestInfo;
-        const isMobile = window.innerWidth <= 768;
-        let guestsHtml = '';
+    getCSRFToken() {
+        // Get CSRF token from cookie or meta tag
+        const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenElement) {
+            return tokenElement.value;
+        }
         
-        if (table.guest_list && table.guest_list.length > 0) {
-            const maxGuests = isMobile ? 4 : 6; // Limit guests shown on mobile
-            const visibleGuests = table.guest_list.slice(0, maxGuests);
-            const remainingCount = table.guest_list.length - maxGuests;
-            
-            guestsHtml = visibleGuests.map(guest => {
-                const isCurrent = currentGuest && currentGuest.id === guest.id;
-                return `<span class="guest-badge${isCurrent ? ' current' : ''}" style="
-                    display: inline-block; background: ${isCurrent ? '#8b6f47' : '#d4c4a8'}; 
-                    color: ${isCurrent ? '#f5f0e8' : '#5d4e37'}; padding: 1px 4px; 
-                    border-radius: 8px; font-size: 0.65rem; margin: 1px;">${guest.full_name}</span>`;
-            }).join('');
-            
-            if (remainingCount > 0) {
-                guestsHtml += `<span style="font-size: 0.65rem; color: #8b6f47; margin-left: 4px;">+${remainingCount} więcej</span>`;
+        // Try to get from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                return value;
             }
         }
-
-        return `
-            <div class="table-popup" style="font-family: Georgia, serif; font-size: ${isMobile ? '0.8rem' : '0.9rem'};">
-                <div style="font-weight: bold; color: #5d4e37; margin-bottom: 4px;">Stół ${table.number}</div>
-                ${table.name ? `<div style="color: #8b6f47; font-weight: bold; margin-bottom: 3px; font-size: 0.85em;">${table.name}</div>` : ''}
-                ${table.description ? `<div style="color: #6b5b4f; margin-bottom: 4px; font-size: 0.8em;">${table.description}</div>` : ''}
-                <div style="color: #5d4e37; margin-bottom: 6px; font-size: 0.8em;">Zajętość: ${table.guests_count}/${table.capacity}</div>
-                ${guestsHtml ? `<div style="margin-top: 6px; line-height: 1.2;">${guestsHtml}</div>` : ''}
-            </div>
-        `;
+        
+        return '';
     }
 
-    handleZoomChange() {
-        const currentZoom = this.map.getZoom();
-        const shouldShowGuests = currentZoom >= (this.minGuestZoom - 1); // More liberal showing of guests
-        
-        console.log(`🔍 Zoom changed to ${currentZoom}, guests visible: ${shouldShowGuests}, minGuestZoom: ${this.minGuestZoom}`);
-        
-        // Show/hide guest avatars based on zoom level
-        Object.values(this.guestMarkers).forEach(tableGuests => {
-            if (Array.isArray(tableGuests)) {
-                tableGuests.forEach(guestMarker => {
-                    if (guestMarker && guestMarker.getElement) {
-                        const element = guestMarker.getElement();
-                        if (element) {
-                            element.style.opacity = shouldShowGuests ? '1' : '0';
-                            element.style.pointerEvents = shouldShowGuests ? 'all' : 'none';
-                        }
-                    }
-                });
-            }
-        });
-        
-        // Update guest avatars size for current zoom if they are visible
-        if (shouldShowGuests) {
-            this.updateGuestAvatarSizes(currentZoom);
-        }
-    }
-
-    updateGuestAvatarSizes(currentZoom) {
-        const zoomFactor = Math.max(0.8, Math.min(1.5, currentZoom + 1.2));
-        
-        Object.entries(this.guestMarkers).forEach(([tableNumber, tableGuests]) => {
-            if (Array.isArray(tableGuests)) {
-                tableGuests.forEach((guestMarker, index) => {
-                    if (guestMarker && guestMarker.getElement) {
-                        const element = guestMarker.getElement();
-                        const avatarDiv = element?.querySelector('.guest-avatar');
-                        if (avatarDiv) {
-                            const isCurrent = avatarDiv.classList.contains('current-guest');
-                            const baseSize = isCurrent ? 32 : 28; // Increased base sizes
-                            const scaledSize = Math.max(18, baseSize * this.mobileScale); // Increased minimum
-                            const newSize = Math.round(scaledSize * zoomFactor);
-                            
-                            avatarDiv.style.width = `${newSize}px`;
-                            avatarDiv.style.height = `${newSize}px`;
-                            avatarDiv.style.fontSize = `${newSize * 0.4}px`;
-                            
-                            // Update marker icon size
-                            const icon = guestMarker.getIcon();
-                            icon.options.iconSize = [newSize, newSize];
-                            icon.options.iconAnchor = [newSize/2, newSize/2];
-                            guestMarker.setIcon(icon);
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    // Additional helper methods...
+    // ...existing code...
     setupSearch() {
-        console.log('🔍 Setting up search functionality...');
-        
         const searchForm = document.getElementById('table-search-form');
         const searchInput = searchForm?.querySelector('input[name="search_query"]');
         
         if (!searchForm || !searchInput) {
-            console.log('⚠️ Search form or input not found');
             return;
         }
         
@@ -983,6 +891,11 @@ class WeddingTableMap {
             color: #5d4e37;
         `;
         
+        const isMobile = window.innerWidth <= 768;
+        const dragInstruction = isMobile ? 
+            'Przytrzymaj i przeciągnij avatar aby zmienić miejsce' : 
+            'Przeciągnij avatar na mapie aby zmienić miejsce przy stole';
+        
         guestInfo.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h5 style="margin: 0; color: #5d4e37;">👤 Informacje o gościu</h5>
@@ -996,6 +909,12 @@ class WeddingTableMap {
                 <strong>Miejsce:</strong> <span>${seatNumber}</span>
                 ${guest.dietary_requirements ? `<strong>Dieta:</strong> <span>${guest.dietary_requirements}</span>` : ''}
             </div>
+            <div style="margin-top: 15px; padding: 10px; background: rgba(212, 196, 168, 0.3); border-radius: 6px; border-left: 4px solid #d4c4a8;">
+                <small style="color: #5d4e37; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-hand-paper" style="color: #8b6f47;"></i>
+                    <strong>Wskazówka:</strong> ${dragInstruction}
+                </small>
+            </div>
         `;
 
         // Insert after the map container
@@ -1006,6 +925,37 @@ class WeddingTableMap {
             // Smooth scroll to the info
             guestInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+    }
+
+    handleZoomChange() {
+        if (!this.map) return;
+        
+        const currentZoom = this.map.getZoom();
+        console.log(`🔍 Zoom changed to: ${currentZoom}, minGuestZoom: ${this.minGuestZoom}`);
+        
+        // Show/hide guest avatars based on zoom level
+        Object.keys(this.guestMarkers).forEach(tableNumber => {
+            const markers = this.guestMarkers[tableNumber];
+            if (markers && markers.length > 0) {
+                markers.forEach(marker => {
+                    const element = marker.getElement();
+                    if (element) {
+                        const avatar = element.querySelector('.guest-avatar');
+                        if (avatar) {
+                            if (currentZoom >= this.minGuestZoom) {
+                                avatar.style.opacity = '1';
+                                avatar.style.pointerEvents = 'all';
+                                marker.setZIndexOffset(marker.options.zIndexOffset);
+                            } else {
+                                avatar.style.opacity = '0.3';
+                                avatar.style.pointerEvents = 'none';
+                                marker.setZIndexOffset(-1000);
+                            }
+                        }
+                    }
+                });
+            }
+        });
     }
 
     showNotification(message, type = 'info') {
@@ -1025,6 +975,36 @@ class WeddingTableMap {
             }
         }, 4000);
     }
+
+    createTablePopup(table) {
+        const guestCount = table.guest_list ? table.guest_list.length : 0;
+        const availableSeats = table.capacity - guestCount;
+        
+        return `
+            <div class="table-popup-content">
+                <h4 style="margin: 0 0 10px 0; color: #5d4e37; font-size: 1.1rem;">
+                    ${table.name || `Stół ${table.number}`}
+                </h4>
+                <div style="display: grid; gap: 5px; font-size: 0.9rem;">
+                    <div><strong>Numer:</strong> ${table.number}</div>
+                    <div><strong>Miejsca:</strong> ${table.capacity}</div>
+                    <div><strong>Wolne:</strong> ${availableSeats}</div>
+                    ${table.description ? `<div><strong>Opis:</strong> ${table.description}</div>` : ''}
+                </div>
+                ${guestCount > 0 ? `
+                    <div style="margin-top: 10px;">
+                        <strong>Goście:</strong>
+                        <div style="max-height: 120px; overflow-y: auto; margin-top: 5px; font-size: 0.8rem;">
+                            ${table.guest_list.slice(0, 10).map(guest => `
+                                <div style="padding: 2px 0;">${guest.full_name}${guest.chair_position ? ` (miejsce ${guest.chair_position})` : ''}</div>
+                            `).join('')}
+                            ${table.guest_list.length > 10 ? `<div style="padding: 2px 0; font-style: italic;">...i ${table.guest_list.length - 10} więcej</div>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
 }
 
 // Initialize when DOM is ready
@@ -1032,6 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🌟 DOM loaded, initializing wedding table map...');
     
     if (document.getElementById('wedding-map')) {
+        console.log('✅ Map container found, creating map...');
         window.weddingTableMap = new WeddingTableMap();
     } else {
         console.error('❌ Map container not found!');

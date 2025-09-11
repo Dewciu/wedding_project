@@ -1,0 +1,45 @@
+{% extends 'wedding/base.html' %}
+{% load static %}
+
+{% block title %}Debug Data - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Debug: Wedding Data</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Tables JSON Data</h4>
+            <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; height: 400px; overflow: auto;">{{ tables_json }}</pre>
+        </div>
+        <div class="col-md-6">
+            <h4>Guest Info JSON Data</h4>
+            <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">{{ guest_info_json }}</pre>
+            
+            <h4>JavaScript Window Data</h4>
+            <div id="js-data" style="background: #f5f5f5; padding: 10px; border-radius: 5px; height: 200px; overflow: auto;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jsDataDiv = document.getElementById('js-data');
+    if (window.weddingData) {
+        jsDataDiv.innerHTML = '<pre>' + JSON.stringify(window.weddingData, null, 2) + '</pre>';
+    } else {
+        jsDataDiv.innerHTML = '<p style="color: red;">window.weddingData not found!</p>';
+    }
+});
+</script>
+
+<!-- Pass Django data to JavaScript -->
+<script>
+    window.weddingData = {
+        tables: {{ tables_json|safe }},
+        currentGuestInfo: {{ guest_info_json|safe }},
+        searchUrl: '{% url "wedding:ajax_table_search" %}',
+        isMobile: {% if request|is_mobile_device %}true{% else %}false{% endif %}
+    };
+</script>
+{% endblock %}

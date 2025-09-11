@@ -528,7 +528,9 @@
                 <div class="mt-3 text-center">
                     <small class="text-muted">
                         <i class="fas fa-mouse-pointer"></i> 
-                        Kliknij stoliki i avatary gości aby zobaczyć szczegóły. Możesz przybliżać i oddalać mapę.
+                        Kliknij stoliki i avatary gości aby zobaczyć szczegóły. Możesz przybliżać i oddalać mapę.<br>
+                        <i class="fas fa-hand-paper"></i>
+                        <strong>Przeciągnij avatary gości</strong> aby zmienić ich pozycję przy stole.
                     </small>
                 </div>
             </div>
@@ -625,7 +627,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <!-- Pass Django data to JavaScript -->
 <script>
     window.weddingData = {
@@ -635,9 +639,6 @@
         isMobile: {% if request|is_mobile_device %}true{% else %}false{% endif %}
     };
 </script>
-{% endblock %}
-
-{% block extra_js %}
 <!-- Leaflet JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="{% static 'wedding/js/table_map_leaflet.js' %}"></script>

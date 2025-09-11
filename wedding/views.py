@@ -6,6 +6,7 @@ from django.db.models import Value
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -189,6 +190,7 @@ def table_finder(request):
                 'id': guest.id,
                 'full_name': guest.full_name,
                 'guest_type': guest.guest_type or 'Gość',
+                'chair_position': guest.chair_position,
                 'user': {
                     'first_name': guest.user.first_name,
                     'last_name': guest.user.last_name
@@ -538,4 +540,120 @@ def generate_qr_code(request):
     </html>
     """
     
-    return HttpResponse(html_content, content_type='text/html')
+    return HttpResponse(html_content)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ajax_update_chair_position(request):
+    """Aktualizacja pozycji krzesła gościa przy stole"""
+    try:
+        data = json.loads(request.body)
+        guest_id = data.get('guest_id')
+        chair_position = data.get('chair_position')
+        
+        if not guest_id or chair_position is None:
+            return JsonResponse({
+                'success': False,
+                'message': 'Brak wymaganych danych'
+            })
+        
+        guest = get_object_or_404(Guest, id=guest_id)
+        guest.chair_position = chair_position
+        guest.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Pozycja gościa {guest.full_name} została zaktualizowana'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Nieprawidłowe dane JSON'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Błąd: {str(e)}'
+        })
+
+def debug_data(request):
+    """Debug view to inspect data being passed to JavaScript"""
+    # Reuse the same logic as table_finder but render debug template
+    tables = Table.objects.all().order_by('number')
+    print(f"Found {tables.count()} tables in database")
+    
+    tables_data = []
+    for table in tables:
+        guest_list = Guest.objects.filter(
+            table_number=table.number
+        ).select_related('user').order_by('user__first_name')
+        
+        print(f"Processing table {table.number}: {guest_list.count()} guests")
+        
+        # Prepare JSON-serializable data for JavaScript
+        guests_json = []
+        for guest in guest_list:
+            guests_json.append({
+                'id': guest.id,
+                'full_name': guest.full_name,
+                'guest_type': guest.guest_type or 'Gość',
+                'chair_position': guest.chair_position,
+                'user': {
+                    'first_name': guest.user.first_name,
+                    'last_name': guest.user.last_name
+                }
+            })
+        
+        # Create table data with positioning info
+        table_dict = {
+            'number': table.number,
+            'name': table.name,
+            'description': table.description,
+            'capacity': table.capacity,
+            'guests_count': guest_list.count(),
+            'guest_list': guests_json,
+            # Positioning data from database (with fallbacks)
+            'map_x': float(table.map_x) if hasattr(table, 'map_x') and table.map_x else 300.0,
+            'map_y': float(table.map_y) if hasattr(table, 'map_y') and table.map_y else 300.0,
+            'map_width': float(table.map_width) if hasattr(table, 'map_width') and table.map_width else 85.0,
+            'map_height': float(table.map_height) if hasattr(table, 'map_height') and table.map_height else 85.0,
+            'shape': getattr(table, 'shape', 'circular'),
+            'color': getattr(table, 'color', '#d4c4a8'),
+            'border_color': getattr(table, 'border_color', '#b8a082'),
+        }
+        
+        tables_data.append(table_dict)
+        print(f"Table {table.number} has {len(guests_json)} guests in JSON data")
+    
+    # Convert to JSON strings
+    try:
+        tables_json_str = json.dumps(tables_data, cls=DjangoJSONEncoder, indent=2)
+        guest_info_json_str = json.dumps(None, cls=DjangoJSONEncoder)
+        print(f"JSON created successfully, {len(tables_data)} tables")
+    except Exception as e:
+        print(f"JSON serialization error: {e}")
+        tables_json_str = "[]"
+        guest_info_json_str = "null"
+    
+    context = {
+        'tables_json': tables_json_str,
+        'guest_info_json': guest_info_json_str,
+    }
+    
+    return render(request, 'wedding/debug_data.html', context)
+
+def debug_token(request):
+    """Debug endpoint to check token validation"""
+    token_from_url = request.GET.get('token')
+    expected_token = getattr(settings, 'WEDDING_ACCESS_TOKEN', 'DEMO2024')
+    session_token = request.session.get('wedding_access_token')
+    session_verified = request.session.get('wedding_access_verified')
+    
+    return JsonResponse({
+        'token_from_url': token_from_url,
+        'expected_token': expected_token,
+        'session_token': session_token,
+        'session_verified': session_verified,
+        'validation_result': token_from_url == expected_token if token_from_url else False
+    })

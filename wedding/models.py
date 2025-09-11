@@ -33,6 +33,7 @@ class Guest(models.Model):
     )
     phone_number = models.CharField(max_length=15, blank=True, verbose_name="Numer telefonu")
     table_number = models.IntegerField(null=True, blank=True, verbose_name="Numer stołu")
+    chair_position = models.IntegerField(null=True, blank=True, verbose_name="Pozycja krzesła", help_text="Pozycja krzesła przy stole (1-N)")
     guest_type = models.CharField(max_length=50, blank=True, verbose_name="Typ gościa")
     dietary_requirements = models.TextField(blank=True, verbose_name="Wymagania dietetyczne")
     plus_one = models.BooleanField(default=False, verbose_name="Osoba towarzysząca")

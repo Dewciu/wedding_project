@@ -10,10 +10,24 @@ class WeddingInfoAdmin(admin.ModelAdmin):
 
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'user', 'table_number', 'confirmed', 'plus_one']
-    list_filter = ['table_number', 'confirmed', 'plus_one']
+    list_display = ['full_name', 'user', 'table_number', 'chair_position', 'confirmed', 'plus_one']
+    list_filter = ['table_number', 'confirmed', 'plus_one', 'chair_position']
     search_fields = ['user__first_name', 'user__last_name', 'user__email']
-    list_editable = ['table_number', 'confirmed']
+    list_editable = ['table_number', 'chair_position', 'confirmed']
+    
+    fieldsets = (
+        ('Podstawowe Informacje', {
+            'fields': ('user', 'phone_number', 'guest_type', 'dietary_requirements')
+        }),
+        ('Miejsce przy stole', {
+            'fields': ('table_number', 'chair_position'),
+            'description': 'Pozycja krzesła przy stole - numery od 1 do liczby miejsc przy stole'
+        }),
+        ('Dodatkowe opcje', {
+            'fields': ('plus_one', 'confirmed'),
+            'classes': ('collapse',)
+        })
+    )
     
     def full_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"

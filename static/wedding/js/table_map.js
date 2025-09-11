@@ -110,6 +110,9 @@ function positionGuestAvatars(tableCircle) {
             this.style.transform = `translate(${x}px, ${y}px) scale(1)`;
             hideGuestTooltip();
         });
+        
+        // Add drag functionality for chair positioning
+        makeDraggable(avatar, tableCircle, index);
     });
 }
 
@@ -389,75 +392,6 @@ function initializeAnimations() {
     });
 }
 
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    const existing = document.querySelector('.notification-toast');
-    if (existing) {
-        existing.remove();
-    }
-    
-    const notification = document.createElement('div');
-    notification.className = `notification-toast notification-${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${getIconForType(type)}"></i>
-        <span>${message}</span>
-        <button class="notification-close">&times;</button>
-    `;
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${getColorForType(type)};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        max-width: 300px;
-        animation: slideInRight 0.3s ease;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }
-    }, 5000);
-    
-    // Manual close
-    notification.querySelector('.notification-close').addEventListener('click', () => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    });
-}
-
-function getIconForType(type) {
-    const icons = {
-        success: 'check-circle',
-        error: 'exclamation-circle',
-        info: 'info-circle',
-        warning: 'exclamation-triangle'
-    };
-    return icons[type] || 'info-circle';
-}
-
-function getColorForType(type) {
-    const colors = {
-        success: 'linear-gradient(135deg, #28a745, #20c997)',
-        error: 'linear-gradient(135deg, #dc3545, #e74c3c)',
-        info: 'linear-gradient(135deg, #17a2b8, #007bff)',
-        warning: 'linear-gradient(135deg, #ffc107, #fd7e14)'
-    };
-    return colors[type] || colors.info;
-}
-
 // Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
@@ -499,5 +433,241 @@ style.textContent = `
     .notification-close:hover {
         opacity: 0.7;
     }
-`;
+    `;
 document.head.appendChild(style);
+
+// Drag and Drop functionality for guest positioning
+function makeDraggable(avatar, tableCircle, originalIndex) {
+    let isDragging = false;
+    let dragStartX, dragStartY;
+    let originalTransform;
+    
+    avatar.style.cursor = 'grab';
+    
+    // Mouse events
+    avatar.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', endDrag);
+    
+    // Touch events for mobile
+    avatar.addEventListener('touchstart', startDragTouch, {passive: false});
+    document.addEventListener('touchmove', dragTouch, {passive: false});
+    document.addEventListener('touchend', endDragTouch);
+    
+    function startDrag(e) {
+        e.preventDefault();
+        isDragging = true;
+        avatar.style.cursor = 'grabbing';
+        avatar.style.zIndex = '1000';
+        
+        const rect = avatar.getBoundingClientRect();
+        const tableRect = tableCircle.getBoundingClientRect();
+        
+        dragStartX = e.clientX - tableRect.left - tableRect.width/2;
+        dragStartY = e.clientY - tableRect.top - tableRect.height/2;
+        originalTransform = avatar.style.transform;
+        
+        avatar.style.transform = `translate(${dragStartX}px, ${dragStartY}px) scale(1.2)`;
+        avatar.classList.add('dragging');
+    }
+    
+    function startDragTouch(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        startDrag({
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            preventDefault: () => {}
+        });
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        
+        const tableRect = tableCircle.getBoundingClientRect();
+        const x = e.clientX - tableRect.left - tableRect.width/2;
+        const y = e.clientY - tableRect.top - tableRect.height/2;
+        
+        avatar.style.transform = `translate(${x}px, ${y}px) scale(1.2)`;
+    }
+    
+    function dragTouch(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        drag({
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            preventDefault: () => {}
+        });
+    }
+    
+    function endDrag(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        avatar.style.cursor = 'grab';
+        avatar.style.zIndex = '';
+        avatar.classList.remove('dragging');
+        
+        // Calculate final position and snap to nearest chair position
+        const tableRect = tableCircle.getBoundingClientRect();
+        const finalX = e.clientX - tableRect.left - tableRect.width/2;
+        const finalY = e.clientY - tableRect.top - tableRect.height/2;
+        
+        snapToChairPosition(avatar, tableCircle, finalX, finalY);
+    }
+    
+    function endDragTouch(e) {
+        if (!isDragging) return;
+        const touch = e.changedTouches[0];
+        endDrag({
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+    }
+}
+
+function snapToChairPosition(avatar, tableCircle, x, y) {
+    const tableShape = tableCircle.dataset.shape || 'circular';
+    const tableWidth = parseFloat(tableCircle.dataset.width) || 85;
+    const tableHeight = parseFloat(tableCircle.dataset.height) || 85;
+    const allAvatars = tableCircle.querySelectorAll('.guest-avatar');
+    const totalAvatars = allAvatars.length;
+    
+    let bestPosition = 0;
+    let minDistance = Infinity;
+    
+    // Calculate possible chair positions
+    const chairPositions = calculateChairPositions(tableShape, tableWidth, tableHeight, totalAvatars);
+    
+    // Find closest chair position
+    chairPositions.forEach((pos, index) => {
+        const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+        if (distance < minDistance) {
+            minDistance = distance;
+            bestPosition = index;
+        }
+    });
+    
+    // Check if position is available (not occupied by another guest)
+    const occupiedPositions = Array.from(allAvatars)
+        .filter(a => a !== avatar)
+        .map(a => parseInt(a.dataset.chairPosition) || 0)
+        .filter(pos => pos > 0);
+    
+    if (occupiedPositions.includes(bestPosition + 1)) {
+        // Find nearest available position
+        for (let i = 0; i < chairPositions.length; i++) {
+            if (!occupiedPositions.includes(i + 1)) {
+                bestPosition = i;
+                break;
+            }
+        }
+    }
+    
+    // Snap to position
+    const finalPos = chairPositions[bestPosition];
+    avatar.style.transform = `translate(${finalPos.x}px, ${finalPos.y}px) scale(1)`;
+    avatar.dataset.chairPosition = bestPosition + 1;
+    
+    // Update in database
+    updateChairPositionInDatabase(avatar.dataset.guestId, bestPosition + 1);
+}
+
+function calculateChairPositions(tableShape, tableWidth, tableHeight, totalChairs) {
+    const positions = [];
+    
+    if (tableShape === 'rectangular' || tableShape === 'square') {
+        const margin = 35;
+        
+        if (tableWidth > tableHeight) {
+            // Horizontal table
+            const spacing = tableWidth / (totalChairs + 1);
+            for (let i = 0; i < totalChairs; i++) {
+                const offsetFromCenter = -tableWidth/2 + spacing * (i + 1);
+                positions.push({
+                    x: offsetFromCenter,
+                    y: i % 2 === 0 ? -margin : margin
+                });
+            }
+        } else {
+            // Vertical table
+            const spacing = tableHeight / (totalChairs + 1);
+            for (let i = 0; i < totalChairs; i++) {
+                const offsetFromCenter = -tableHeight/2 + spacing * (i + 1);
+                positions.push({
+                    x: -margin,
+                    y: offsetFromCenter
+                });
+            }
+        }
+    } else {
+        // Circular table
+        const radius = 55;
+        const angleStep = 360 / totalChairs;
+        for (let i = 0; i < totalChairs; i++) {
+            const angle = angleStep * i - 90;
+            const radian = (angle * Math.PI) / 180;
+            positions.push({
+                x: Math.cos(radian) * radius,
+                y: Math.sin(radian) * radius
+            });
+        }
+    }
+    
+    return positions;
+}
+
+function updateChairPositionInDatabase(guestId, chairPosition) {
+    if (!guestId) return;
+    
+    fetch('/ajax/update-chair-position/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            guest_id: guestId,
+            chair_position: chairPosition
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Pozycja krzesła zaktualizowana:', data.message);
+            showNotification('✅ Pozycja gościa została zapisana', 'success');
+        } else {
+            console.error('Błąd aktualizacji:', data.message);
+            showNotification('❌ Błąd zapisywania pozycji', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Błąd sieci:', error);
+        showNotification('❌ Błąd połączenia', 'error');
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button class="notification-close">&times;</button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+    
+    // Manual close
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+    });
+}
